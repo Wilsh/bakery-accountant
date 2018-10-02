@@ -1,0 +1,37 @@
+{% extends "bakery/base.html" %}
+
+{% block title %}
+  Add Ingredient
+{% endblock %}
+
+{% block content %}
+  <h1 class="text-center">Add an Ingredient</h1>
+
+  <form action="/add/grocery/" method="post">
+    {% csrf_token %}
+    <table class="table">
+      {{ form }}
+    </table>
+    <button type="submit" value="Submit" class="btn btn-custom-green">Submit</button>
+  </form>
+{% endblock %}
+
+{% block script %}
+<script>
+//set choices to be blank on load
+$("#{{ form.default_units.id_for_label }}").val('').prop('selected', true);
+$("#{{ form.units.id_for_label }}").val('').prop('selected', true);
+//disable default_units choice if units == 'Count'
+$("#{{ form.units.id_for_label }}").on('change', function(){
+    var choice = $("#{{ form.units.id_for_label }} option:selected").text()
+    var default_choice = $("#{{ form.default_units.id_for_label }}")
+    if(choice == 'Count') {
+        $("#{{ form.default_units.id_for_label }}").val('ct').prop('selected', true);
+        default_choice.prop('disabled', true);
+    }
+    else {
+        default_choice.prop('disabled', false);
+    }
+});
+</script>
+{% endblock %}

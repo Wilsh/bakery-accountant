@@ -1,0 +1,117 @@
+{% extends "bakery/base.html" %}
+{% load bakery_extras %}
+
+{% block title %}
+  Add Order
+{% endblock %}
+
+{% block content %}
+  <h1 class="text-center">Create an Order</h1>
+
+  <form action="/add/order/" method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors.errors %}
+      <ul class="alert alert-danger" role="alert">
+      {% for error in form.non_field_errors.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+    <!-- customer -->
+    <div class="fieldWrapper">
+      {% if form.customer.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.customer.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.customer.id_for_label }}">{{ form.customer.label }}:</label>
+        <input type="text" name="{{ form.customer.name }}" maxlength="{{ form.customer.field.max_length }}" required value="{% if form.customer.value != None %}{{ form.customer.value }}{% endif %}" id="{{ form.customer.id_for_label }}" class="form-control {% if form.customer.errors %}is-invalid{% endif %}" />
+      </div>
+    </div>
+    <!-- recipes -->
+    <div class="fieldWrapper">
+      {% if form.recipes.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.recipes.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div id="recipeBlock">
+        <select name="{{ form.recipes.name }}" required id="{{ form.recipes.id_for_label }}">
+          <!-- options added via script -->
+        </select>
+      </div>
+      <button id="addRecipe" type="button" class="btn btn-custom-blue btn-sm">Add Another Recipe</button>
+
+    </div>
+    <br>
+    <!-- delivery -->
+    <div class="fieldWrapper">
+      <div class="form-check">
+        <input type="checkbox" name="{{ form.requires_delivery.name }}" class="form-check-input" id="{{ form.requires_delivery.id_for_label }}">
+        <label class="form-check-label" for="{{ form.requires_delivery.id_for_label }}">Check if delivery is required</label>
+      </div>
+    </div>
+    <!-- due date -->
+    <div class="fieldWrapper">
+      {% if form.delivery_date.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.delivery_date.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.delivery_date.id_for_label }}">{{ form.delivery_date.label }}:</label>
+        <input type="datetime-local" name="{{ form.delivery_date.name }}" id="{{ form.delivery_date.id_for_label }}" value="{% get_datetime_now %}" class="form-control {% if form.delivery_date.errors %}is-invalid{% endif %}">
+      </div>
+    </div>
+    <!-- notes -->
+    <div class="fieldWrapper">
+      {% if form.notes.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.notes.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}:</label>
+        <textarea name="{{ form.notes.name }}" id="{{ form.notes.id_for_label }}" class="form-control" rows="3">{% if form.notes.value != None %}{{ form.notes.value }}{% endif %}</textarea>
+      </div>
+    </div>
+
+    <button type="submit" value="Submit" class="btn btn-custom-green">Submit</button>
+  </form>
+{% endblock %}
+
+{% block script %}
+<script>
+//create Recipe options for select elements
+var recipeDict = {% get_recipes %};
+var recipeOptions = '<option value="" selected>Select a recipe</option>';
+for(id in recipeDict){
+    recipeOptions += '<option value="'+id+'">'+recipeDict[id]+'</option>';
+}
+//add Recipes to existing select element
+$(function() {
+    $("#{{ form.recipes.id_for_label }}").append(recipeOptions);
+});
+//create new Recipe select element on button click
+var counter = 1;
+$("#addRecipe").on('click', function() {
+    var new_select = $( "<select>", {
+            html: recipeOptions,
+            "name": "addedRecipe" + counter,
+            "id": "addedRecipe" + counter
+        });
+        new_select.appendTo("#recipeBlock");
+    counter++;
+});
+</script>
+{% endblock %}
