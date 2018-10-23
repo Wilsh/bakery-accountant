@@ -1,0 +1,21 @@
+{% extends "bakery/base.html" %}
+{% load bakery_extras %}
+
+{% block title %}
+  Recipe: {{ recipe_info.name }}
+{% endblock %}
+
+{% block content %}
+  <h3 class="text-center">{{ recipe_info.name }}</h3>
+  <ul>
+  {% for component in recipe_info.components.all %}
+    <li>{{ component.name }}</li>
+    <ul>
+      {% for grocery in component.groceries.all %}
+        {% get_ingredient grocery component as ingredient %}
+        <li>{{ ingredient.amount|get_common_fraction }} {{ ingredient.units }} {{ grocery.name }}</li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+  </ul>
+{% endblock %}

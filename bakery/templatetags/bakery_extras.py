@@ -1,13 +1,15 @@
 from django import template
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
-from bakery.models import Grocery, Recipe
+from bakery.models import Grocery, Ingredient, Recipe
 from datetime import datetime
+
 register = template.Library()
 
 @register.simple_tag
 def get_grocery_unit_dict():
-    '''Return a dictionary containing a list of the default units and a hash for each Grocery name
+    '''Return a dictionary containing a list of the default units and a 
+    hash for each Grocery name
     '''
     groceries = Grocery.objects.all()
     dict = {}
@@ -27,7 +29,7 @@ def get_recipes():
 
 @register.filter
 def dict_to_list(dict):
-    '''Convert a dictionary into a sorted list
+    '''Convert a dictionary into a list of key-value pairs sorted by key
     '''
     list = []
     for entry in sorted(dict):
@@ -37,7 +39,10 @@ def dict_to_list(dict):
 @register.filter
 @stringfilter
 def get_option_tag(str):
-    '''
+    '''Return a string formatted for use as an option of a select element.
+    The returned string is not marked safe because this tag is intended to
+    produce a string that is used in a comparison and not as actual html.
+    str must be a key in the units dictionary.
     '''
     units = {
         'ct': 'Count',
@@ -49,8 +54,25 @@ def get_option_tag(str):
         'pt': 'Pint',
         'qt': 'Quart',
     }
-    #return '<option value="'+str+'">'+units[str]+'</option>'
-    return '<option value="{str}">{units[str]}</option>'
+    return f'<option value="{str}">{units[str]}</option>'
+
+@register.filter
+@stringfilter
+def get_option_tag_selected(str):
+    '''Return a string formatted for use as an option of a select element.
+    str must be a key in the units dictionary.
+    '''
+    units = {
+        'ct': 'Count',
+        'p': 'Pinch',
+        'tsp': 'Teaspoon',
+        'tbsp': 'Tablespoon',
+        'floz': 'Fluid Ounce',
+        'C': 'Cup',
+        'pt': 'Pint',
+        'qt': 'Quart',
+    }
+    return mark_safe(f'<option value="{str}" selected>{units[str]}</option>')
 
 @register.filter
 @stringfilter
@@ -68,30 +90,16 @@ def is_custom_amount(str):
 @register.filter
 @stringfilter
 def get_grocery_name(custom_amount_hash):
+    '''Return the name attribute of the Grocery object corresponding 
+    to the given hash value
+    '''
     return Grocery.objects.get(hash=revert_name(custom_amount_hash)).name
 
 @register.filter
 @stringfilter
-def get_option_tag_selected(str):
-    '''
-    '''
-    units = {
-        'ct': 'Count',
-        'p': 'Pinch',
-        'tsp': 'Teaspoon',
-        'tbsp': 'Tablespoon',
-        'floz': 'Fluid Ounce',
-        'C': 'Cup',
-        'pt': 'Pint',
-        'qt': 'Quart',
-    }
-    #return mark_safe('<option value="'+str+'" selected>'+units[str]+'</option>')
-    return mark_safe(f'<option value="{str}" selected>{units[str]}</option>')
-
-@register.filter
-@stringfilter
 def revert_name(str):
-    '''Remove the text 'custom_amount_' or 'custom_units_' from a string
+    '''Remove the text 'custom_amount_' or 'custom_units_' from the start 
+    of a string
     '''
     if str.startswith('custom_'):
         str = str.replace('custom_', '')
@@ -103,28 +111,45 @@ def revert_name(str):
 
 @register.simple_tag
 def get_datetime_now():
-    '''return current datetime in the format YYYY-MM-DDTHH:MM:SS
+    '''Return current datetime in the format YYYY-MM-DDTHH:MM:SS
     '''
     date = datetime.now().replace(microsecond=0)
     return date.isoformat()
 
-@register.tag
-def resolve_str(parser, token):
-    try:
-        tag_name, str = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError(
-            "%r tag requires a single argument" % token.contents.split()[0]
-        )
-    return ResolveStrNode(str)
+@register.simple_tag
+def get_ingredient(grocery, component):
+    '''Return the Ingredient object corresponding to the given Grocery 
+    and Component objects
+    '''
+    return Ingredient.objects.get(for_grocery=grocery, for_component=component)
 
-class ResolveStrNode(template.Node):
-    def __init__(self, str):
-        self.str = template.Variable(str)
-
-    def render(self, context):
-        try:
-            context[str] = self.str.resolve(context)
-        except template.VariableDoesNotExist:
-            pass
-        return ''
+@register.filter
+@stringfilter
+def get_common_fraction(num):
+    '''Given the Decimal 'num' with three decimal places, return its 
+    representation as a fraction or mixed number if the decimal component 
+    has a common fraction as seen in recipes. A num in the form 'x.000' is 
+    returned without the decimal component
+    '''
+    dict = {
+        '875': '7/8',
+        '750': '3/4',
+        '667': '2/3',
+        '625': '5/8',
+        '500': '1/2',
+        '375': '3/8',
+        '333': '1/3',
+        '250': '1/4',
+        '125': '1/8',
+        '000': ''
+    }
+    string = str(num)
+    out = ''
+    wholenum = int(string[:len(string)-4])
+    if wholenum > 0:
+        out += str(wholenum) + ' '
+    if string[len(string)-3:] in dict:
+        out += dict[string[len(string)-3:]]
+    else:
+        return string
+    return out.strip()

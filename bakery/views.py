@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.views.generic.base import TemplateView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views import generic
+from django.utils import timezone
 
 from decimal import Decimal
 from collections import Counter
@@ -11,8 +11,41 @@ from bakery.models import Grocery, Ingredient, Component, Recipe, Order, OrderQu
 from .forms import GroceryForm, ComponentForm, RecipeForm, OrderForm, parse_str_to_decimal
 
 # Create your views here.
-class HomeView(TemplateView):
-    template_name = 'bakery/base.html'
+class HomeView(generic.ListView):
+    model = Order
+    template_name = 'bakery/home.html'
+    context_object_name = 'orders'
+    
+    def get_queryset(self):
+        return reversed(Order.objects.filter(delivery_date__gte=timezone.localtime())[:3])
+
+class RecipeDetailView(generic.DetailView):
+    model = Recipe
+    template_name = 'bakery/recipe_detail.html'
+    context_object_name = 'recipe_info'
+
+class OrderListView(generic.ListView):
+    model = Order
+    template_name = 'bakery/order_list.html'
+    context_object_name = 'order_list'
+    paginate_by = 2
+
+class OrderDetailView(generic.DetailView):
+    model = Order
+    template_name = 'bakery/order_detail.html'
+    context_object_name = 'order_info'
+    
+    def get_context_data(self, **kwargs):
+        context = super(OrderDetailView, self).get_context_data(**kwargs)
+        #add recipe info to context using OrderQuantity
+        cost = 0
+        recipe_list = []
+        for order_quantity in OrderQuantity.objects.filter(for_order=context['order_info']):
+            recipe_list.append(order_quantity)
+            cost += order_quantity.for_recipe.cost
+        context['recipes'] = recipe_list
+        context['cost'] = cost
+        return context
 
 def create_grocery(request):
     if request.method == 'POST':

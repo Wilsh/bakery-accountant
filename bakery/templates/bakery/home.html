@@ -1,0 +1,23 @@
+{% extends "bakery/base.html" %}
+
+{% block title %}
+  Bakery - Upcoming Orders
+{% endblock %}
+
+{% block content %}
+  <h3>Upcoming Orders</h3>
+  <ul>
+  {% for order in orders %}
+    <li><a href="{% url 'bakery:order_detail' order.pk %}">{{ order }}</a></li>
+    <ul>
+      <li>Price: ${{ order.quoted_price }}</li>
+      <li>Delivery Date: {{ order.delivery_date }}</li>
+      {% if order.notes %}
+        <li>Notes: {{ order.notes }}</li>
+      {% endif %}
+    </ul>
+  {% empty %}
+    <li>No upcoming orders</li>
+  {% endfor %}
+  </ul>
+{% endblock %}
