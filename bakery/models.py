@@ -48,8 +48,6 @@ class Grocery(models.Model):
 
     def __str__(self):
         return self.name
-        # return "Grocery: " + self.name + " Cost: " + str(self.cost) + " Units: " + str(self.units) \
-            # + " Unit Cost: " + str(self.unit_cost)
 
     def calculate_values(self):
         if self.cost_amount == 0:
@@ -73,8 +71,6 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return f"Ingredient: {self.for_grocery.name} {self.amount} {self.units} Component: {self.for_component.name}"
-        # return "Ingredient: " + self.for_grocery.name + " " + str(self.amount) + self.units \
-            # + " Component: " + self.for_component.name
 
     def get_cost(self):
         if self.units == 'ct':
@@ -129,8 +125,6 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name 
-        #+ " Cost: " + str(self.cost) \
-        #    + " Price: " + str(self.price)
 
     def _calculate_cost(self):
         total = 0
@@ -183,7 +177,7 @@ class Order(models.Model):
             total += item.get_price() * multiplier
         if self.requires_delivery:
             total += 15
-        #total = int(total)
+        total = int(total)
         while total % 5 != 0:
             total += 1
         self.quoted_price = total
@@ -198,7 +192,6 @@ class OrderQuantity(models.Model):
     
     def __str__(self):
         return f"Order for: {self.for_order.customer} {self.quantity} {self.for_recipe.name}"
-        #return "Order for: " + self.for_order.customer + " " + str(self.quantity) + " " + self.for_recipe.name
     
     def get_quantity(self):
         return self.quantity

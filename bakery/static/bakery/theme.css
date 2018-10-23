@@ -1,3 +1,19 @@
+body { 
+    background: url("memphis-colorful.png") repeat 0 0;
+}
+
+.navbar { 
+    background-color: #3dd9f4;
+}
+
+#content {
+    background: rgba(255, 255, 255, 0.7)
+}
+
+#content div {
+    background: rgba(255, 255, 255, 0)
+}
+
 .btn-custom-green {
     color: #fff;
     background-color: #38e0a5;
@@ -9,4 +25,15 @@
     background-color: #3d7df4;
     border-color: #3d7df4;
 }
+
+.btn-custom-purple {
+    color: #fff;
+    background-color: #b43df4;
+    border-color: #b43df4;
+}
+
+.btn-custom-green:hover, .btn-custom-blue:hover, .btn-custom-purple:hover {
+    color: #ddd;
+}
+
 

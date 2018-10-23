@@ -1,0 +1,24 @@
+{% extends "bakery/base.html" %}
+
+{% block title %}
+  Order for {{ order_info.customer }}
+{% endblock %}
+
+{% block content %}
+  <h3 class="text-center">Order for {{ order_info.customer }}</h3>
+  <dl class="row">
+    <dt class="col-sm-3 text-right">Delivery date:</dt><dd class="col-sm-9">{{ order_info.delivery_date }}</dd>
+    <dt class="col-sm-3 text-right">Price:</dt><dd class="col-sm-9">${{ order_info.quoted_price }}</dd>
+    <dt class="col-sm-3 text-right">Ingredient Cost:</dt><dd class="col-sm-9">${{ cost }}</dd>
+    {% if order_info.requires_delivery %}
+    <dt class="col-sm-3 text-right">Delivery Charge:</dt><dd class="col-sm-9">$15</dd>
+    {% endif %}
+    <dt class="col-sm-3 text-right">Recipes:</dt><dd class="col-sm-9">
+      {% for recipe in recipes %}
+        {{ recipe.quantity }} <a href="{% url 'bakery:recipe_detail' recipe.for_recipe.pk %}">{{ recipe.for_recipe.name }}</a>
+      {% endfor %}
+    </dd>
+    <dt class="col-sm-3 text-right">Notes:</dt>
+      <dd class="col-sm-9">{% if order_info.notes %}{{ order_info.notes }}{% else %}None{% endif %}</dd>
+  </dl>
+{% endblock %}

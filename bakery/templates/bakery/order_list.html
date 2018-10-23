@@ -1,0 +1,50 @@
+{% extends "bakery/base.html" %}
+{% load bakery_extras %}
+
+{% block title %}
+  Browse Orders
+{% endblock %}
+
+{% block content %}
+  <div style="height:15px"></div>
+  <div class="card-deck">
+  {% for order in order_list %}
+    <div class="card col-md-4">
+      <div class="card-header bg-transparent">
+        <h5 class="card-title">Order for {{ order.customer }}</h5>
+      </div>
+      <div class="card-body">
+        <dl>
+          <dt>Delivery date:</dt><dd>{{ order.delivery_date }}</dd>
+          <dt>Price:</dt><dd>${{ order.quoted_price }}</dd>
+          {% if order.requires_delivery %}
+          <dt>Requires Delivery:</dt><dd>yes</dd>
+          {% endif %}
+          <dt>Notes:</dt><dd>{% if order.notes %}{{ order.notes }}{% else %}None{% endif %}</dd>
+        </dl>
+      </div>
+      <div class="card-footer bg-transparent">
+        <a class="btn btn-custom-purple card-link" href="{% url 'bakery:order_detail' order.pk %}">View Details</a>
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+  <div style="height:15px"></div>
+  {% if is_paginated %}
+    <div class="row justify-content-center">
+        <div class="col col-md-1 offset-md-4">
+        {% if page_obj.has_previous %}
+            <a class="btn btn-custom-green btn-sm" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        </div>
+        <div class="col-md-auto">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
+        <div class="col">
+        {% if page_obj.has_next %}
+            <a class="btn btn-custom-green btn-sm" href="?page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
