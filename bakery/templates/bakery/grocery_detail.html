@@ -1,0 +1,18 @@
+{% extends "bakery/base.html" %}
+{% load bakery_extras %}
+
+{% block title %}
+  Ingredient: {{ grocery_info.name }}
+{% endblock %}
+
+{% block content %}
+  <div class="translucent">
+    <h3 class="text-center">{{ grocery_info.name }}</h3>
+    <dl>
+      <dt>Purchase Cost:</dt><dd>${{ grocery_info.cost }}</dd>
+      <dt>Purchase Amount:</dt><dd>{{ grocery_info.cost_amount|get_common_fraction }} {{ grocery_info.get_units_display }}</dd>
+      <dt>Default units:</dt><dd>{{ grocery_info.get_default_units_display }}</dd>
+    </dl>
+  </div>
+  <a class="btn btn-custom-blue" href="#">Edit</a>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "bakery/base.html" %}
+{% load bakery_extras %}
+
+{% block title %}
+  Component: {{ component_info.name }}
+{% endblock %}
+
+{% block content %}
+  <div class="translucent">
+    <h3 class="text-center">{{ component_info.name }}</h3>
+    <dl>
+      <dt>Type:</dt><dd>{{ component_info.get_component_type_display }}</dd>
+      <dt>Ingredient Cost:</dt><dd>${{ component_info.cost }}</dd>
+      <dt>Ingredients:</dt><dd>
+        <ul>
+          {% for grocery in component_info.groceries.all %}
+            {% get_ingredient grocery component_info as ingredient %}
+            <li>{{ ingredient.amount|get_common_fraction }} {{ ingredient.units }} <a href="{% url 'bakery:grocery_detail' ingredient.for_grocery.pk %}">{{ grocery.name }}</a></li>
+          {% endfor %}
+        </ul>
+        </dd>
+      <dt>Notes:</dt><dd>{% if component_info.notes %}{{ component_info.notes }}{% else %}None{% endif %}</dd>
+    </dl>
+  </div>
+  <a class="btn btn-custom-blue" href="#">Edit</a>
+{% endblock %}

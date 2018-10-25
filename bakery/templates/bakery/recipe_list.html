@@ -1,34 +1,37 @@
 {% extends "bakery/base.html" %}
 {% load bakery_extras %}
+{% load static %}
 
 {% block title %}
-  Browse Orders
+  Browse Recipes
 {% endblock %}
 
 {% block content %}
   <div style="height:15px"></div>
   <div class="card-deck">
-  {% for order in order_list %}
+  {% for recipe in recipe_list %}
     <div class="card col-md-4">
+      <img class="card-img-top" src="{% static 'bakery/' %}{{ recipe.image }}" alt="Recipe image">
       <div class="card-header bg-transparent">
-        <h5 class="card-title">Order for {{ order.customer }}</h5>
+        <h5 class="card-title">{{ recipe.name }}</h5>
       </div>
       <div class="card-body">
         <dl>
-          <dt>Delivery date:</dt><dd>{{ order.delivery_date }}</dd>
-          <dt>Price:</dt><dd>${{ order.quoted_price }}</dd>
-          {% if order.requires_delivery %}
-          <dt>Requires Delivery:</dt><dd>yes</dd>
-          {% endif %}
-          <dt>Notes:</dt><dd>{% if order.notes %}{{ order.notes }}{% else %}None{% endif %}</dd>
+          <dt>Price:</dt><dd>${{ recipe.price }}</dd>
+          <dt>Time estimate:</dt><dd>
+            {% if recipe.time_actual %}{{ recipe.time_actual|get_common_fraction }}
+            {% else %}{{ recipe.time_estimate|get_common_fraction }}
+            hours
+            {% endif %}
+          </dd>
+          <dt>Notes:</dt><dd>{% if recipe.notes %}{{ recipe.notes }}{% else %}None{% endif %}</dd>
         </dl>
       </div>
       <div class="card-footer bg-transparent">
-        <a class="btn btn-custom-purple card-link" href="{% url 'bakery:order_detail' order.pk %}">View Details</a>
+        <a class="btn btn-custom-orange card-link" href="{% url 'bakery:recipe_detail' recipe.pk %}">View Details</a>
       </div>
     </div>
   {% endfor %}
-  </div>
   <div style="height:15px"></div>
   {% if is_paginated %}
     <div class="row justify-content-center">
@@ -46,5 +49,5 @@
         {% endif %}
         </div>
     </div>
-  {% endif %}
+    {% endif %}
 {% endblock %}

@@ -10,15 +10,42 @@ from collections import Counter
 from bakery.models import Grocery, Ingredient, Component, Recipe, Order, OrderQuantity
 from .forms import GroceryForm, ComponentForm, RecipeForm, OrderForm, parse_str_to_decimal
 
-# Create your views here.
 class HomeView(generic.ListView):
     model = Order
     template_name = 'bakery/home.html'
     context_object_name = 'orders'
     
     def get_queryset(self):
-        return reversed(Order.objects.filter(delivery_date__gte=timezone.localtime())[:3])
+        return reversed(Order.objects.filter(delivery_date__gte=timezone.localtime()))
 
+class GroceryListView(generic.ListView):
+    model = Grocery
+    template_name = 'bakery/grocery_list.html'
+    context_object_name = 'grocery_list'
+    paginate_by = 20
+
+class GroceryDetailView(generic.DetailView):
+    model = Grocery
+    template_name = 'bakery/grocery_detail.html'
+    context_object_name = 'grocery_info'
+
+class ComponentListView(generic.ListView):
+    model = Component
+    template_name = 'bakery/component_list.html'
+    context_object_name = 'component_list'
+    paginate_by = 10
+
+class ComponentDetailView(generic.DetailView):
+    model = Component
+    template_name = 'bakery/component_detail.html'
+    context_object_name = 'component_info'
+
+class RecipeListView(generic.ListView):
+    model = Recipe
+    template_name = 'bakery/recipe_list.html'
+    context_object_name = 'recipe_list'
+    paginate_by = 6
+        
 class RecipeDetailView(generic.DetailView):
     model = Recipe
     template_name = 'bakery/recipe_detail.html'
@@ -28,7 +55,7 @@ class OrderListView(generic.ListView):
     model = Order
     template_name = 'bakery/order_list.html'
     context_object_name = 'order_list'
-    paginate_by = 2
+    paginate_by = 6
 
 class OrderDetailView(generic.DetailView):
     model = Order
@@ -50,6 +77,7 @@ class OrderDetailView(generic.DetailView):
 def create_grocery(request):
     if request.method == 'POST':
         form = GroceryForm(request.POST)
+        print(request.POST)
         if form.is_valid():
             item = Grocery(name = form.cleaned_data['name'],
                     cost = form.cleaned_data['cost'],
@@ -67,7 +95,7 @@ def create_grocery(request):
 def revert_name(str):
     '''Remove the text 'custom_amount_' or 'custom_units_' from the start of a string
     '''
-    if str.startswith('custom_'):
+    if str.startswith('custom_amount_') or str.startswith('custom_units_'):
         str = str.replace('custom_', '')
         if str.startswith('amount_'):
             str = str.replace('amount_', '')

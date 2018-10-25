@@ -7,7 +7,6 @@ from math import ceil
 import hashlib
 from datetime import datetime
 
-# Create your models here.
 UNIT_TYPES = (
     ('ct', 'Count'),
     ('p', 'Pinch'),
@@ -93,7 +92,7 @@ class Component(models.Model):
     notes = models.TextField(default='', blank=True)
 
     class Meta:
-        ordering = ["component_type"]
+        ordering = ["component_type", "name"]
 
     def __str__(self):
         return self.name
@@ -152,7 +151,7 @@ class Recipe(models.Model):
 class Order(models.Model):
     '''The top-level organizational model. An Order contains one or more Recipes,
     a Recipe contains one or more Components, and a Component contains one or more
-    Ingredients.
+    Groceries.
     '''
     recipes = models.ManyToManyField(Recipe, through='OrderQuantity')
     customer = models.CharField(max_length=120)
@@ -189,6 +188,9 @@ class OrderQuantity(models.Model):
     for_recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
     for_order = models.ForeignKey('Order', on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(default=1)
+    
+    class Meta:
+        verbose_name_plural = "order quantities"
     
     def __str__(self):
         return f"Order for: {self.for_order.customer} {self.quantity} {self.for_recipe.name}"

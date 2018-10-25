@@ -7,11 +7,19 @@ body {
 }
 
 #content {
+    background: rgba(255, 255, 255, 0)
+}
+
+#content div div div {
+    background: rgba(255, 255, 255, 0)
+}
+
+#content div div {
     background: rgba(255, 255, 255, 0.7)
 }
 
-#content div {
-    background: rgba(255, 255, 255, 0)
+.translucent {
+    background: rgba(255, 255, 255, 0.7)
 }
 
 .btn-custom-green {
@@ -32,7 +40,19 @@ body {
     border-color: #b43df4;
 }
 
-.btn-custom-green:hover, .btn-custom-blue:hover, .btn-custom-purple:hover {
+.btn-custom-orange {
+    color: #fff;
+    background-color: #f4b43d;
+    border-color: #f4b43d;
+}
+
+.btn-custom-pink {
+    color: #fff;
+    background-color: #f43d7d;
+    border-color: #f43d7d;
+}
+
+.btn-custom-green:hover, .btn-custom-blue:hover, .btn-custom-purple:hover, .btn-custom-orange:hover, .btn-custom-pink:hover {
     color: #ddd;
 }
 
