@@ -5,15 +5,104 @@
 {% endblock %}
 
 {% block content %}
+  <div class="translucent">
   <h1 class="text-center">Add an Ingredient</h1>
 
-  <form action="/add/grocery/" method="post">
+  <form enctype="multipart/form-data" action="/add/grocery/" method="post">
     {% csrf_token %}
-    <table class="table">
-      {{ form }}
-    </table>
+    {% if form.non_field_errors.errors %}
+      <ul class="alert alert-danger" role="alert">
+      {% for error in form.non_field_errors.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+    <!-- name -->
+    <div class="fieldWrapper">
+      {% if form.name.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.name.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <!--<label for="{{ form.name.id_for_label }}">{{ form.name.label }}:</label>-->
+        {{ form.name.label_tag }}
+        <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" maxlength="{{ form.name.field.max_length }}" required value="{% if form.name.value != None %}{{ form.name.value }}{% endif %}" class="form-control {% if form.name.errors %}is-invalid{% endif %}" />
+      </div>
+    </div>
+    <!-- cost -->
+    <div class="fieldWrapper">
+      {% if form.cost.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.cost.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <!--<label for="{{ form.cost.id_for_label }}">{{ form.cost.label }}:</label>-->
+        {{ form.cost.label_tag }}
+        <input type="number" step="0.01" name="{{ form.cost.name }}" id="{{ form.cost.id_for_label }}" maxlength="{{ form.cost.field.max_length }}" required value="{% if form.cost.value != None %}{{ form.cost.value }}{% endif %}" class="form-control {% if form.cost.errors %}is-invalid{% endif %}" />
+      </div>
+    </div>
+    <!-- cost amount -->
+    <div class="fieldWrapper">
+      {% if form.cost_amount.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.cost_amount.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <!--<label for="{{ form.cost_amount.id_for_label }}">{{ form.cost_amount.label }}:</label>-->
+        {{ form.cost_amount.label_tag }}
+        <input type="number" step="0.001" name="{{ form.cost_amount.name }}" id="{{ form.cost_amount.id_for_label }}" maxlength="{{ form.cost_amount.field.max_length }}" required value="{% if form.cost_amount.value != None %}{{ form.cost_amount.value }}{% endif %}" class="form-control {% if form.cost_amount.errors %}is-invalid{% endif %}" />
+      </div>
+    </div>
+    <!-- units -->
+    <div class="fieldWrapper">
+      {% if form.units.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.units.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        {{ form.units.label_tag }}
+        <select name="{{ form.units.name }}" required id="{{ form.units.id_for_label }}" class="form-control">
+          <option></option>
+          {% for item in form.units %}
+            {{ item }}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <!-- default units -->
+    <div class="fieldWrapper">
+      {% if form.default_units.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.default_units.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        {{ form.default_units.label_tag }}
+        <select name="{{ form.default_units.name }}" required id="{{ form.default_units.id_for_label }}" class="form-control">
+          <option></option>
+          {% for item in form.default_units %}
+            {{ item }}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
     <button type="submit" value="Submit" class="btn btn-custom-green">Submit</button>
   </form>
+  </div>
 {% endblock %}
 
 {% block script %}
@@ -27,11 +116,11 @@ $("#{{ form.units.id_for_label }}").on('change', function(){
     var default_choice = $("#{{ form.default_units.id_for_label }}")
     if(choice == 'Count') {
         $("#{{ form.default_units.id_for_label }}").val('ct').prop('selected', true);
-        default_choice.prop('disabled', true);
+        //default_choice.prop('disabled', true);
     }
-    else {
-        default_choice.prop('disabled', false);
-    }
+    //else {
+        //default_choice.prop('disabled', false);
+    //}
 });
 </script>
 {% endblock %}

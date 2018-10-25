@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block content %}
+  <div class="translucent">
   <h1 class="text-center">Add a Recipe</h1>
-
   <form enctype="multipart/form-data" action="/add/recipe/" method="post">
     {% csrf_token %}
     {% if form.non_field_errors.errors %}
@@ -114,6 +114,7 @@
       </div>
       <div class="form-group">
         <label>Have you made this recipe before?</label>
+        <div>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" name="hasBeenMadeBefore" id="inlineRadio1" value="yes" checked>
           <label class="form-check-label" for="inlineRadio1">Yes</label>
@@ -121,6 +122,7 @@
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" name="hasBeenMadeBefore" id="inlineRadio2" value="no">
           <label class="form-check-label" for="inlineRadio2">No</label>
+        </div>
         </div>
       </div>
     </div>
@@ -155,6 +157,7 @@
 
     <button type="submit" value="Submit" class="btn btn-custom-green">Submit</button>
   </form>
+  </div>
   <div style="height:15px"></div>
 {% endblock %}
 

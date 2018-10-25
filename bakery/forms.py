@@ -34,7 +34,7 @@ class GroceryForm(forms.Form):
     cost_amount = forms.DecimalField(label='Purchase amount', max_digits=7, decimal_places=3, 
         validators=[MinValueValidator(Decimal('0.001'), message="Amount must be greater than zero.")]
         )
-    units = forms.ChoiceField(label='Units', choices=UNIT_TYPES)
+    units = forms.ChoiceField(label='Purchase units', choices=UNIT_TYPES)
     default_units = forms.ChoiceField(label='Default units for recipe measurement', choices=UNIT_TYPES)
     
     def clean_name(self):
@@ -48,6 +48,12 @@ class GroceryForm(forms.Form):
         except Grocery.DoesNotExist:
             pass
         return name
+    
+    def clean_default_units(self):
+        if self.cleaned_data['default_units'] == 'ct' and self.cleaned_data['units'] != 'ct':
+            raise forms.ValidationError(
+                _("Cannot set Default units to 'Count' if Purchase units is not also 'Count'."))
+        return self.cleaned_data['default_units']
 
 def parse_str_to_decimal(str):
     '''Converts a string containing a whole number, mixed number, fraction, or decimal to a Decimal.
@@ -163,7 +169,23 @@ class ComponentForm(forms.Form):
                 self.fields[amount_hash_id] = forms.CharField(label=amount_hash_id, max_length=10, validators=[validate_str_as_decimal])
                 self.fields[units_hash_id] = forms.ChoiceField(label=units_hash_id, choices=UNIT_TYPES)
     
-    #add validation for units when count is default
+    def clean(self):
+        #validation for units in added fields
+        cleaned_data = super().clean()
+        for field in cleaned_data:
+            if field.startswith('custom_units_'):
+                msg = ""
+                str = field.replace('custom_units_', '')
+                grocery = Grocery.objects.get(hash=str)
+                if cleaned_data[field] == 'ct' and grocery.units != 'ct':
+                    msg = "Cannot select 'Count' for an ingredient whose default units are not 'Count'"
+                    break
+                elif cleaned_data[field] != 'ct' and grocery.units == 'ct':
+                    msg = "The default units for this ingredient are 'Count'"
+                    break
+        if msg:
+            self.add_error(field, forms.ValidationError(_(msg)))
+        return cleaned_data
     
     def clean_name(self):
         name = self.cleaned_data['name']

@@ -6,11 +6,10 @@
 {% endblock %}
 
 {% block content %}
+  <div class="translucent">
   <h1 class="text-center">Create an Order</h1>
-
   <form action="/add/order/" method="post">
     {% csrf_token %}
-
     {% if form.non_field_errors.errors %}
       <ul class="alert alert-danger" role="alert">
       {% for error in form.non_field_errors.errors %}
@@ -42,12 +41,11 @@
         </ul>
       {% endif %}
       <div id="recipeBlock">
-        <select name="{{ form.recipes.name }}" required id="{{ form.recipes.id_for_label }}">
+        <select name="{{ form.recipes.name }}" required id="{{ form.recipes.id_for_label }}" class="form-control">
           <!-- options added via script -->
         </select>
       </div>
-      <button id="addRecipe" type="button" class="btn btn-custom-blue btn-sm">Add Another Recipe</button>
-
+      <button id="addRecipe" type="button" class="btn btn-custom-blue" style="margin-top:5px">Add Another Recipe</button>
     </div>
     <br>
     <!-- delivery -->
@@ -85,9 +83,10 @@
         <textarea name="{{ form.notes.name }}" id="{{ form.notes.id_for_label }}" class="form-control" rows="3">{% if form.notes.value != None %}{{ form.notes.value }}{% endif %}</textarea>
       </div>
     </div>
-
     <button type="submit" value="Submit" class="btn btn-custom-green">Submit</button>
   </form>
+  </div>
+  <div style="height:15px"></div>
 {% endblock %}
 
 {% block script %}
@@ -108,7 +107,8 @@ $("#addRecipe").on('click', function() {
     var new_select = $( "<select>", {
             html: recipeOptions,
             "name": "addedRecipe" + counter,
-            "id": "addedRecipe" + counter
+            "id": "addedRecipe" + counter,
+            "class": "form-control"
         });
         new_select.appendTo("#recipeBlock");
     counter++;

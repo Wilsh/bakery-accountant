@@ -19,7 +19,7 @@ def get_grocery_unit_dict():
 
 @register.simple_tag
 def get_recipes():
-    '''Return a dictionary of recipes using their database ids as keys
+    '''Return a dictionary of Recipe names using their database ids as keys
     '''
     recipes = Recipe.objects.all()
     dict = {}
@@ -101,7 +101,7 @@ def revert_name(str):
     '''Remove the text 'custom_amount_' or 'custom_units_' from the start 
     of a string
     '''
-    if str.startswith('custom_'):
+    if str.startswith('custom_amount_') or str.startswith('custom_units_'):
         str = str.replace('custom_', '')
         if str.startswith('amount_'):
             str = str.replace('amount_', '')

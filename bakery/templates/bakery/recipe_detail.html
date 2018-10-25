@@ -6,16 +6,25 @@
 {% endblock %}
 
 {% block content %}
-  <h3 class="text-center">{{ recipe_info.name }}</h3>
-  <ul>
-  {% for component in recipe_info.components.all %}
-    <li>{{ component.name }}</li>
-    <ul>
-      {% for grocery in component.groceries.all %}
-        {% get_ingredient grocery component as ingredient %}
-        <li>{{ ingredient.amount|get_common_fraction }} {{ ingredient.units }} {{ grocery.name }}</li>
-      {% endfor %}
-    </ul>
-  {% endfor %}
-  </ul>
+  <div class="translucent">
+    <h3 class="text-center">{{ recipe_info.name }}</h3>
+    <dl>
+      <dt>Components:</dt><dd>
+        <ul>
+          {% for component in recipe_info.components.all %}
+            <li><a href="{% url 'bakery:component_detail' component.pk %}">{{ component.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </dd>
+      <dt>Ingredient cost:</dt><dd>${{ recipe_info.cost }}</dd>
+      <dt>Price:</dt><dd>${{ recipe_info.price }}</dd>
+      <dt>Time estimate:</dt><dd>
+        {% if recipe_info.time_actual %}{{ recipe_info.time_actual|get_common_fraction }}
+        {% else %}{{ recipe_info.time_estimate|get_common_fraction }}
+        hours
+        {% endif %}
+      </dd>
+      <dt>Notes:</dt><dd>{% if recipe_info.notes %}{{ recipe_info.notes }}{% else %}None{% endif %}</dd>
+  </div>
+  <a class="btn btn-custom-blue" href="#">Edit</a>
 {% endblock %}

@@ -5,19 +5,29 @@
 {% endblock %}
 
 {% block content %}
-  <h3>Upcoming Orders</h3>
-  <ul>
+  <h3 class="text-center translucent">Upcoming Orders</h3>
+  <div class="card-deck">
   {% for order in orders %}
-    <li><a href="{% url 'bakery:order_detail' order.pk %}">{{ order }}</a></li>
-    <ul>
-      <li>Price: ${{ order.quoted_price }}</li>
-      <li>Delivery Date: {{ order.delivery_date }}</li>
-      {% if order.notes %}
-        <li>Notes: {{ order.notes }}</li>
-      {% endif %}
-    </ul>
+    <div class="card col-md-4">
+      <div class="card-header bg-transparent">
+        <h5 class="card-title">Order for {{ order.customer }}</h5>
+      </div>
+      <div class="card-body">
+        <dl>
+          <dt>Delivery date:</dt><dd>{{ order.delivery_date }}</dd>
+          <dt>Price:</dt><dd>${{ order.quoted_price }}</dd>
+          {% if order.requires_delivery %}
+          <dt>Requires Delivery:</dt><dd>yes</dd>
+          {% endif %}
+          <dt>Notes:</dt><dd>{% if order.notes %}{{ order.notes }}{% else %}None{% endif %}</dd>
+        </dl>
+      </div>
+      <div class="card-footer bg-transparent">
+        <a class="btn btn-custom-purple card-link" href="{% url 'bakery:order_detail' order.pk %}">View Details</a>
+      </div>
+    </div>
   {% empty %}
-    <li>No upcoming orders</li>
+    <h1>No upcoming orders</h1>
   {% endfor %}
-  </ul>
+  </div>
 {% endblock %}

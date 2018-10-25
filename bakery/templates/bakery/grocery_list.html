@@ -1,0 +1,41 @@
+{% extends "bakery/base.html" %}
+{% load bakery_extras %}
+
+{% block title %}
+  Browse Groceries
+{% endblock %}
+
+{% block content %}
+  <table class="table table-hover table-condensed text-left translucent">
+    <tr>
+      <th>Name</th>
+      <th>Cost</th>
+      <th>Amount</th>
+    </tr>
+  {% for grocery in grocery_list %}
+    <tr>
+      <td><a href="{% url 'bakery:grocery_detail' grocery.pk %}">{{ grocery.name }}</a></td>
+      <td>${{ grocery.cost }}</td>
+      <td>{{ grocery.cost_amount|get_common_fraction }} {{ grocery.units }}</td>
+    </tr>
+  {% endfor %}
+  </table>
+  <div style="height:15px"></div>
+  {% if is_paginated %}
+    <div class="row justify-content-center">
+        <div class="col col-md-1 offset-md-4">
+        {% if page_obj.has_previous %}
+            <a class="btn btn-custom-green btn-sm" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        </div>
+        <div class="col-md-auto">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
+        <div class="col">
+        {% if page_obj.has_next %}
+            <a class="btn btn-custom-green btn-sm" href="?page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+        </div>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -22,19 +22,25 @@
         <div class="collapse navbar-collapse" id="navbar">
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'bakery:home' %}">Home</a>
+              <a class="nav-link" href="{% url 'bakery:home' %}">Current Orders</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'bakery:create-grocery' %}">Add Ingredient</a>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Add</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="{% url 'bakery:create-grocery' %}">Ingredient</a>
+                <a class="dropdown-item" href="{% url 'bakery:create-component' %}">Component</a>
+                <a class="dropdown-item" href="{% url 'bakery:create-recipe' %}">Recipe</a>
+                <a class="dropdown-item" href="{% url 'bakery:create-order' %}">Order</a>
+              </div>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'bakery:create-component' %}">Add Component</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'bakery:create-recipe' %}">Add Recipe</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'bakery:create-order' %}">Add Order</a>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">View</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="{% url 'bakery:view-groceries' %}">Ingredients</a>
+                <a class="dropdown-item" href="{% url 'bakery:view-components' %}">Components</a>
+                <a class="dropdown-item" href="{% url 'bakery:view-recipes' %}">Recipes</a>
+                <a class="dropdown-item" href="{% url 'bakery:view-orders' %}">Orders</a>
+              </div>
             </li>
           </ul>
         </div>
