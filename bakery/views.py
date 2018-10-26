@@ -3,9 +3,11 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+from django.conf import settings
 
 from decimal import Decimal
 from collections import Counter
+from PIL import Image
 
 from bakery.models import Grocery, Ingredient, Component, Recipe, Order, OrderQuantity
 from .forms import GroceryForm, ComponentForm, RecipeForm, OrderForm, parse_str_to_decimal
@@ -153,16 +155,24 @@ def create_recipe(request):
     if request.method == 'POST':
         form = RecipeForm(request.POST, request.FILES)
         if form.is_valid():
-            #print(request.POST)
-            time = parse_str_to_decimal(form.cleaned_data['time_estimate'])[1]
-            #print(type(time))
+            #create new Recipe
             item = Recipe(name = form.cleaned_data['name'],
-                    time_estimate = time,
-                    time_actual = time if request.POST['hasBeenMadeBefore'] == 'yes' else 0,
-                    #image = models.ImageField()
+                    time_estimate = form.cleaned_data['time_estimate'],
+                    time_actual = form.cleaned_data['time_estimate'] if request.POST['hasBeenMadeBefore'] == 'yes' else 0,
                     notes = form.cleaned_data['notes']
                     )
+            if request.FILES:
+                item.image = request.FILES['file']
             item.save()
+            #create image thumbnail
+            if request.FILES:
+                file = item.image.name.rsplit('/', 1)[1]
+                img = Image.open(settings.MEDIA_ROOT + item.image.name)
+                img.thumbnail((500,500))
+                img.save(settings.MEDIA_ROOT + 'thumbnails/' + file)
+                item.image_thumb = settings.MEDIA_URL + 'thumbnails/' + file
+                item.save()
+            #link Recipe to Components
             for component in form.cleaned_data.get('component_baked'):
                 item.components.add(component)
             for component in form.cleaned_data.get('component_icing'):
@@ -172,7 +182,7 @@ def create_recipe(request):
             for component in form.cleaned_data.get('component_other'):
                 item.components.add(component)
             item.calculate_values()
-            return HttpResponseRedirect(reverse('bakery:home'))
+            return HttpResponseRedirect(reverse('bakery:view-recipes'))
     else:
         form = RecipeForm()
     return render(request, 'bakery/addrecipe.html', {'form': form})

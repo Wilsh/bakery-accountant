@@ -1,6 +1,7 @@
 from django.db import models
 from django.forms import ModelForm
 from django.utils import timezone
+from django.conf import settings
 
 from decimal import Decimal
 from math import ceil
@@ -116,7 +117,8 @@ class Recipe(models.Model):
     time_actual = models.DecimalField(max_digits=5, decimal_places=3, default=0)
     cost = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     price = models.PositiveSmallIntegerField(default=0)
-    image = models.ImageField(default='default.jpg')
+    image = models.ImageField(upload_to='originals/', default='originals/default.jpg')
+    image_thumb = models.CharField(max_length=300, default=settings.MEDIA_URL+'thumbnails/default.jpg')
     notes = models.TextField(default='', blank=True)
 
     class Meta:
