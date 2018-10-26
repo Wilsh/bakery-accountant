@@ -11,8 +11,8 @@
   <div class="card-deck">
   {% for recipe in recipe_list %}
     <div class="card col-md-4">
-      <img class="card-img-top" src="{% static 'bakery/' %}{{ recipe.image }}" alt="Recipe image">
-      <div class="card-header bg-transparent">
+      <a href="{{ recipe.image.url }}"><img class="card-img-top" src="{{ recipe.image_thumb }}" alt="Recipe image"></a>
+      <div class="card-header bg-transparent text-center">
         <h5 class="card-title">{{ recipe.name }}</h5>
       </div>
       <div class="card-body">
@@ -21,8 +21,7 @@
           <dt>Time estimate:</dt><dd>
             {% if recipe.time_actual %}{{ recipe.time_actual|get_common_fraction }}
             {% else %}{{ recipe.time_estimate|get_common_fraction }}
-            hours
-            {% endif %}
+            {% endif %} hours
           </dd>
           <dt>Notes:</dt><dd>{% if recipe.notes %}{{ recipe.notes }}{% else %}None{% endif %}</dd>
         </dl>

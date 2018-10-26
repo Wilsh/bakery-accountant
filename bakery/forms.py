@@ -209,6 +209,18 @@ class RecipeForm(forms.Form):
     image = forms.ImageField(label='Image (optional)', required=False)
     notes = forms.CharField(label='Notes', required=False, widget=forms.Textarea)
 
+    def clean(self):
+        cleaned_data = super(RecipeForm, self).clean()
+        component_baked = cleaned_data.get('component_baked')
+        component_icing = cleaned_data.get('component_icing')
+        component_decoration = cleaned_data.get('component_decoration')
+        component_other = cleaned_data.get('component_other')
+
+        if component_baked or component_icing or component_decoration or component_other:
+            pass
+        else:
+            self.add_error('component_baked', "At least one component must be selected.")
+    
     def clean_name(self):
         name = self.cleaned_data['name']
         try:
@@ -221,17 +233,8 @@ class RecipeForm(forms.Form):
             pass
         return name
 
-    def clean(self):
-        cleaned_data = super(RecipeForm, self).clean()
-        component_baked = cleaned_data.get('component_baked')
-        component_icing = cleaned_data.get('component_icing')
-        component_decoration = cleaned_data.get('component_decoration')
-        component_other = cleaned_data.get('component_other')
-
-        if component_baked or component_icing or component_decoration or component_other:
-            pass
-        else:
-            self.add_error('component_baked', "At least one component must be selected.")
+    def clean_time_estimate(self):
+        return parse_str_to_decimal(self.cleaned_data['time_estimate'])[1]
 
 class OrderForm(forms.Form):
     customer = forms.CharField(label='Customer name', max_length=120)
