@@ -4,6 +4,8 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from decimal import Decimal
 from collections import Counter
@@ -12,7 +14,7 @@ from PIL import Image
 from bakery.models import Grocery, Ingredient, Component, Recipe, Order, OrderQuantity
 from .forms import GroceryForm, ComponentForm, RecipeForm, OrderForm, parse_str_to_decimal
 
-class HomeView(generic.ListView):
+class HomeView(LoginRequiredMixin, generic.ListView):
     model = Order
     template_name = 'bakery/home.html'
     context_object_name = 'orders'
@@ -20,46 +22,46 @@ class HomeView(generic.ListView):
     def get_queryset(self):
         return reversed(Order.objects.filter(delivery_date__gte=timezone.localtime()))
 
-class GroceryListView(generic.ListView):
+class GroceryListView(LoginRequiredMixin, generic.ListView):
     model = Grocery
     template_name = 'bakery/grocery_list.html'
     context_object_name = 'grocery_list'
     paginate_by = 20
 
-class GroceryDetailView(generic.DetailView):
+class GroceryDetailView(LoginRequiredMixin, generic.DetailView):
     model = Grocery
     template_name = 'bakery/grocery_detail.html'
     context_object_name = 'grocery_info'
 
-class ComponentListView(generic.ListView):
+class ComponentListView(LoginRequiredMixin, generic.ListView):
     model = Component
     template_name = 'bakery/component_list.html'
     context_object_name = 'component_list'
     paginate_by = 10
 
-class ComponentDetailView(generic.DetailView):
+class ComponentDetailView(LoginRequiredMixin, generic.DetailView):
     model = Component
     template_name = 'bakery/component_detail.html'
     context_object_name = 'component_info'
 
-class RecipeListView(generic.ListView):
+class RecipeListView(LoginRequiredMixin, generic.ListView):
     model = Recipe
     template_name = 'bakery/recipe_list.html'
     context_object_name = 'recipe_list'
     paginate_by = 6
         
-class RecipeDetailView(generic.DetailView):
+class RecipeDetailView(LoginRequiredMixin, generic.DetailView):
     model = Recipe
     template_name = 'bakery/recipe_detail.html'
     context_object_name = 'recipe_info'
 
-class OrderListView(generic.ListView):
+class OrderListView(LoginRequiredMixin, generic.ListView):
     model = Order
     template_name = 'bakery/order_list.html'
     context_object_name = 'order_list'
     paginate_by = 6
 
-class OrderDetailView(generic.DetailView):
+class OrderDetailView(LoginRequiredMixin, generic.DetailView):
     model = Order
     template_name = 'bakery/order_detail.html'
     context_object_name = 'order_info'
@@ -76,6 +78,7 @@ class OrderDetailView(generic.DetailView):
         context['cost'] = cost
         return context
 
+@login_required
 def create_grocery(request):
     if request.method == 'POST':
         form = GroceryForm(request.POST)
@@ -89,7 +92,7 @@ def create_grocery(request):
                     )
             item.save()
             item.calculate_values()
-            return HttpResponseRedirect(reverse('bakery:home'))
+            return HttpResponseRedirect(reverse('bakery:view-groceries'))
     else:
         form = GroceryForm()
     return render(request, 'bakery/addgrocery.html', {'form': form})
@@ -121,6 +124,7 @@ def component_sort_post_to_dict(post):
                 dict[name] = [[entry, post[entry]]]
     return dict
 
+@login_required
 def create_component(request):
     added_fields_context = {}
     if request.method == 'POST':
@@ -146,11 +150,12 @@ def create_component(request):
                     )
                     ingredient.save()
             item.calculate_cost()
-            return HttpResponseRedirect(reverse('bakery:home'))
+            return HttpResponseRedirect(reverse('bakery:view-components'))
     else:
         form = ComponentForm()
     return render(request, 'bakery/addcomponent.html', {'form': form, 'extra': added_fields_context})
 
+@login_required
 def create_recipe(request):
     if request.method == 'POST':
         form = RecipeForm(request.POST, request.FILES)
@@ -196,6 +201,7 @@ def order_sort_post_to_dict(post):
             dict[key] = post[key]
     return dict
 
+@login_required
 def create_order(request):
     added_fields_context = {}
     if request.method == 'POST':
@@ -228,8 +234,22 @@ def create_order(request):
             #for key in form.cleaned_data.items():
                 #print(key)
             order.calculate_quoted_price()
-            return HttpResponseRedirect(reverse('bakery:home'))
+            return HttpResponseRedirect(reverse('bakery:view-orders'))
         #print(request.POST)
     else:
         form = OrderForm()
     return render(request, 'bakery/addorder.html', {'form': form, 'extra': added_fields_context})
+    
+@login_required
+def delete_order(request):
+    if request.method == 'POST':
+        try:
+            order = Order.objects.get(pk=request.POST['pk'])
+            order.delete()
+        except KeyError:
+            #print('no key in post')
+            pass
+        except Order.DoesNotExist:
+            #print('order not found')
+            pass
+    return HttpResponseRedirect(reverse('bakery:home'))

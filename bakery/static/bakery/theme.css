@@ -6,16 +6,8 @@ body {
     background-color: #3dd9f4;
 }
 
-#content {
+#content, .clearbg {
     background: rgba(255, 255, 255, 0)
-}
-
-#content div div div {
-    background: rgba(255, 255, 255, 0)
-}
-
-#content div div {
-    background: rgba(255, 255, 255, 0.7)
 }
 
 .translucent {

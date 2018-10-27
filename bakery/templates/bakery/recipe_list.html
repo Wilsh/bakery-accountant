@@ -10,24 +10,26 @@
   <div style="height:15px"></div>
   <div class="card-deck">
   {% for recipe in recipe_list %}
-    <div class="card col-md-4">
-      <a href="{{ recipe.image.url }}"><img class="card-img-top" src="{{ recipe.image_thumb }}" alt="Recipe image"></a>
-      <div class="card-header bg-transparent text-center">
-        <h5 class="card-title">{{ recipe.name }}</h5>
-      </div>
-      <div class="card-body">
-        <dl>
-          <dt>Price:</dt><dd>${{ recipe.price }}</dd>
-          <dt>Time estimate:</dt><dd>
-            {% if recipe.time_actual %}{{ recipe.time_actual|get_common_fraction }}
-            {% else %}{{ recipe.time_estimate|get_common_fraction }}
-            {% endif %} hours
-          </dd>
-          <dt>Notes:</dt><dd>{% if recipe.notes %}{{ recipe.notes }}{% else %}None{% endif %}</dd>
-        </dl>
-      </div>
-      <div class="card-footer bg-transparent">
-        <a class="btn btn-custom-orange card-link" href="{% url 'bakery:recipe_detail' recipe.pk %}">View Details</a>
+    <div class="card col-md-4 translucent">
+      <div class="clearbg">
+        <a href="{{ recipe.image.url }}"><img class="card-img-top" src="{{ recipe.image_thumb }}" alt="Recipe image"></a>
+        <div class="card-header bg-transparent text-center">
+          <h5 class="card-title">{{ recipe.name }}</h5>
+        </div>
+        <div class="card-body">
+          <dl>
+            <dt>Price:</dt><dd>${{ recipe.price }}</dd>
+            <dt>Time estimate:</dt><dd>
+              {% if recipe.time_actual %}{{ recipe.time_actual|get_common_fraction }}
+              {% else %}{{ recipe.time_estimate|get_common_fraction }}
+              {% endif %} hours
+            </dd>
+            <dt>Notes:</dt><dd>{% if recipe.notes %}{{ recipe.notes }}{% else %}None{% endif %}</dd>
+          </dl>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a class="btn btn-custom-orange card-link" href="{% url 'bakery:recipe_detail' recipe.pk %}">View Details</a>
+        </div>
       </div>
     </div>
   {% endfor %}

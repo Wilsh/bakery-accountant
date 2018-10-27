@@ -2,9 +2,11 @@ from django import forms
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 
 import re
 from decimal import Decimal
+from datetime import datetime
 
 from bakery.models import Grocery, Component, Recipe, Order
 
@@ -257,8 +259,6 @@ class OrderForm(forms.Form):
                     self.fields[item] = forms.ModelChoiceField(queryset=Recipe.objects.all(), empty_label="Select a recipe")
     
     def clean_delivery_date(self):
-        date = self.cleaned_data['delivery_date']
-        date = date.replace('T', ' ')
-        return date
-
-    
+        str = self.cleaned_data['delivery_date']
+        date = datetime.strptime(str, '%Y-%m-%dT%H:%M:%S')
+        return timezone.make_aware(date)
