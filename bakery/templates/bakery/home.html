@@ -5,25 +5,27 @@
 {% endblock %}
 
 {% block content %}
-  <h3 class="text-center translucent">Upcoming Orders</h3>
+  <h3 class="text-center">Upcoming Orders</h3>
   <div class="card-deck">
   {% for order in orders %}
-    <div class="card col-md-4">
-      <div class="card-header bg-transparent">
-        <h5 class="card-title">Order for {{ order.customer }}</h5>
-      </div>
-      <div class="card-body">
-        <dl>
-          <dt>Delivery date:</dt><dd>{{ order.delivery_date }}</dd>
-          <dt>Price:</dt><dd>${{ order.quoted_price }}</dd>
-          {% if order.requires_delivery %}
-          <dt>Requires Delivery:</dt><dd>yes</dd>
-          {% endif %}
-          <dt>Notes:</dt><dd>{% if order.notes %}{{ order.notes }}{% else %}None{% endif %}</dd>
-        </dl>
-      </div>
-      <div class="card-footer bg-transparent">
-        <a class="btn btn-custom-purple card-link" href="{% url 'bakery:order_detail' order.pk %}">View Details</a>
+    <div class="card col-md-4 translucent">
+      <div class="clearbg">
+        <div class="card-header bg-transparent text-center">
+          <h5 class="card-title">Order for {{ order.customer }}</h5>
+        </div>
+        <div class="card-body">
+          <dl>
+            <dt>Delivery date:</dt><dd>{{ order.delivery_date }}</dd>
+            <dt>Price:</dt><dd>${{ order.quoted_price }}</dd>
+            {% if order.requires_delivery %}
+            <dt>Requires Delivery:</dt><dd>yes</dd>
+            {% endif %}
+            <dt>Notes:</dt><dd>{% if order.notes %}{{ order.notes }}{% else %}None{% endif %}</dd>
+          </dl>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a class="btn btn-custom-purple card-link" href="{% url 'bakery:order_detail' order.pk %}">View Details</a>
+        </div>
       </div>
     </div>
   {% empty %}

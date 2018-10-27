@@ -6,7 +6,6 @@ from django.conf import settings
 from decimal import Decimal
 from math import ceil
 import hashlib
-from datetime import datetime
 
 UNIT_TYPES = (
     ('ct', 'Count'),
