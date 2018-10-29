@@ -7,7 +7,7 @@
 {% block content %}
   <div class="translucent">
   <h1 class="text-center">Add a Recipe</h1>
-  <form enctype="multipart/form-data" action="/add/recipe/" method="post">
+  <form enctype="multipart/form-data" method="post">
     {% csrf_token %}
     {% if form.non_field_errors.errors %}
       <ul class="alert alert-danger" role="alert">

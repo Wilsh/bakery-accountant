@@ -2,7 +2,7 @@ from django import template
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
 from bakery.models import Grocery, Ingredient, Recipe
-from datetime import datetime
+from datetime import datetime, date
 
 register = template.Library()
 
@@ -115,6 +115,12 @@ def get_datetime_now():
     '''
     date = datetime.now().replace(microsecond=0)
     return date.isoformat()
+
+@register.simple_tag
+def get_date():
+    '''Return current date in the format YYYY-MM-DD
+    '''
+    return date.today().isoformat()
 
 @register.simple_tag
 def get_ingredient(grocery, component):

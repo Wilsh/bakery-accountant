@@ -8,7 +8,7 @@
   <div class="translucent">
   <h1 class="text-center">Add an Ingredient</h1>
 
-  <form enctype="multipart/form-data" action="/add/grocery/" method="post">
+  <form method="post">
     {% csrf_token %}
     {% if form.non_field_errors.errors %}
       <ul class="alert alert-danger" role="alert">
