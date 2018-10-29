@@ -157,7 +157,7 @@ class Order(models.Model):
     recipes = models.ManyToManyField(Recipe, through='OrderQuantity')
     customer = models.CharField(max_length=120)
     created_date = models.DateTimeField(default=timezone.now)
-    delivery_date = models.DateTimeField()
+    delivery_date = models.DateField()
     requires_delivery = models.BooleanField(default=False)
     quoted_price = models.PositiveSmallIntegerField(default=0)
     price_paid = models.PositiveSmallIntegerField(default=0)

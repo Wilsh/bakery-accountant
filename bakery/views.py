@@ -2,12 +2,12 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
-from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from decimal import Decimal
+from datetime import date
 from collections import Counter
 from PIL import Image
 
@@ -20,7 +20,7 @@ class HomeView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'orders'
     
     def get_queryset(self):
-        return reversed(Order.objects.filter(delivery_date__gte=timezone.localtime()))
+        return reversed(Order.objects.filter(delivery_date__gte=date.today()))
 
 class GroceryListView(LoginRequiredMixin, generic.ListView):
     model = Grocery

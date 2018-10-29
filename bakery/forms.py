@@ -48,7 +48,7 @@ class GroceryForm(forms.Form):
                 params={'name': name},
                 )
         except Grocery.DoesNotExist:
-            pass
+            name = ' '.join(word[0].upper() + word[1:] for word in name.split())
         return name
     
     def clean_default_units(self):
@@ -198,7 +198,7 @@ class ComponentForm(forms.Form):
                 params={'name': name},
                 )
         except Component.DoesNotExist:
-            pass
+            name = ' '.join(word[0].upper() + word[1:] for word in name.split())
         return name
 
 class RecipeForm(forms.Form):
@@ -232,7 +232,7 @@ class RecipeForm(forms.Form):
                 params={'name': name},
                 )
         except Recipe.DoesNotExist:
-            pass
+            name = ' '.join(word[0].upper() + word[1:] for word in name.split())
         return name
 
     def clean_time_estimate(self):
@@ -241,7 +241,7 @@ class RecipeForm(forms.Form):
 class OrderForm(forms.Form):
     customer = forms.CharField(label='Customer name', max_length=120)
     recipes = forms.ModelChoiceField(queryset=Recipe.objects.all(), empty_label="Select a recipe")
-    delivery_date = forms.CharField()
+    delivery_date = forms.DateField()
     requires_delivery = forms.BooleanField(required=False, widget=forms.CheckboxInput)
     notes = forms.CharField(label='Notes', required=False, widget=forms.Textarea)
     
@@ -257,8 +257,3 @@ class OrderForm(forms.Form):
             for item in recipes:
                 if recipes[item] != '':
                     self.fields[item] = forms.ModelChoiceField(queryset=Recipe.objects.all(), empty_label="Select a recipe")
-    
-    def clean_delivery_date(self):
-        str = self.cleaned_data['delivery_date']
-        date = datetime.strptime(str, '%Y-%m-%dT%H:%M:%S')
-        return timezone.make_aware(date)

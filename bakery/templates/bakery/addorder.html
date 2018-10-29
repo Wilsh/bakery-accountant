@@ -8,7 +8,7 @@
 {% block content %}
   <div class="translucent">
   <h1 class="text-center">Create an Order</h1>
-  <form action="/add/order/" method="post">
+  <form method="post">
     {% csrf_token %}
     {% if form.non_field_errors.errors %}
       <ul class="alert alert-danger" role="alert">
@@ -66,7 +66,7 @@
       {% endif %}
       <div class="form-group">
         <label for="{{ form.delivery_date.id_for_label }}">{{ form.delivery_date.label }}:</label>
-        <input type="datetime-local" name="{{ form.delivery_date.name }}" id="{{ form.delivery_date.id_for_label }}" value="{% get_datetime_now %}" class="form-control {% if form.delivery_date.errors %}is-invalid{% endif %}">
+        <input type="date" name="{{ form.delivery_date.name }}" id="{{ form.delivery_date.id_for_label }}" value="{% get_date %}" class="form-control {% if form.delivery_date.errors %}is-invalid{% endif %}">
       </div>
     </div>
     <!-- notes -->
