@@ -18,6 +18,7 @@
           <dl>
             <dt>Delivery date:</dt><dd>{{ order.delivery_date }}</dd>
             <dt>Price:</dt><dd>${{ order.quoted_price }}</dd>
+            <dt>Deposit:</dt><dd>${{ order.deposit }}</dd>
             {% if order.requires_delivery %}
             <dt>Requires Delivery:</dt><dd>yes</dd>
             {% endif %}

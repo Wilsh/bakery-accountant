@@ -73,7 +73,7 @@ class OrderDetailView(LoginRequiredMixin, generic.DetailView):
         recipe_list = []
         for order_quantity in OrderQuantity.objects.filter(for_order=context['order_info']):
             recipe_list.append(order_quantity)
-            cost += order_quantity.for_recipe.cost
+            cost += order_quantity.for_recipe.cost * order_quantity.get_quantity()
         context['recipes'] = recipe_list
         context['cost'] = cost
         return context
@@ -233,7 +233,7 @@ def create_order(request):
             #print('############################################')
             #for key in form.cleaned_data.items():
                 #print(key)
-            order.calculate_quoted_price()
+            order.calculate_prices()
             return HttpResponseRedirect(reverse('bakery:view-orders'))
         #print(request.POST)
     else:

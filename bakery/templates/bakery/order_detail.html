@@ -19,6 +19,7 @@
             {% endfor %}
           </dd>
           <dt>Price:</dt><dd>${{ order_info.quoted_price }}</dd>
+          <dt>Deposit:</dt><dd>${{ order_info.deposit }}</dd>
           <dt>Delivery date:</dt><dd>{{ order_info.delivery_date }}</dd>
           {% if order_info.requires_delivery %}
           <dt>Delivery Charge:</dt><dd>$15</dd>
