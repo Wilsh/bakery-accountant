@@ -186,12 +186,13 @@ class Order(models.Model):
         while total % 5 != 0:
             total += 1
         #set deposit to be divisible by five and at least the ingredient cost or 30% of the total cost (whichever is higher)
-        if deposit < 0.3 * total:
-            deposit = 0.3 * total
-        deposit = ceil(deposit)
-        while deposit % 5 != 0:
-            deposit += 1
-        self.deposit = deposit
+        if not self.deposit_paid:
+            if deposit < 0.3 * total:
+                deposit = 0.3 * total
+            deposit = ceil(deposit)
+            while deposit % 5 != 0:
+                deposit += 1
+            self.deposit = deposit
         if self.requires_delivery:
             total += 15
         self.quoted_price = total

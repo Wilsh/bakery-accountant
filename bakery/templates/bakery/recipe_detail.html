@@ -18,7 +18,7 @@
           <dt>Components:</dt><dd>
             <ul>
               {% for component in recipe_info.components.all %}
-                <li><a href="{% url 'bakery:component_detail' component.pk %}">{{ component.name }}</a></li>
+                <li><a href="{% url 'bakery:component-detail' component.pk %}">{{ component.name }}</a></li>
               {% endfor %}
             </ul>
           </dd>

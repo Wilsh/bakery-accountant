@@ -27,6 +27,18 @@ def get_recipes():
         dict[item.id] = item.name
     return mark_safe(dict)
 
+@register.inclusion_tag('bakery/options.html')
+def get_recipe_options(pk=None):
+    '''Display an <option> for a <select> element for each Recipe where the value attribute
+    is the primary key for the Recipe. The Recipe corresponding to the (optionally) given 
+    primary key will be set as the selected option
+    '''
+    recipes = Recipe.objects.all()
+    dict = {}
+    for item in recipes:
+        dict[item.id] = item.name
+    return {'name':dict, 'pk':pk}
+
 @register.filter
 def dict_to_list(dict):
     '''Convert a dictionary into a list of key-value pairs sorted by key
@@ -86,6 +98,10 @@ def is_custom(str):
 @register.filter
 def is_custom_amount(str):
     return str.startswith('custom_amount')
+    
+@register.filter
+def is_addedRecipe(str):
+    return str.startswith('addedRecipe')
 
 @register.filter
 @stringfilter

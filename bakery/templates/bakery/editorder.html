@@ -2,12 +2,12 @@
 {% load bakery_extras %}
 
 {% block title %}
-  Add Order
+  Edit Order
 {% endblock %}
 
 {% block content %}
   <div class="translucent">
-  <h1 class="text-center">Create an Order</h1>
+  <h1 class="text-center">Edit Order</h1>
   <form method="post">
     {% csrf_token %}
     {% if form.non_field_errors.errors %}
@@ -28,7 +28,7 @@
       {% endif %}
       <div class="form-group">
         <label for="{{ form.customer.id_for_label }}">{{ form.customer.label }}:</label>
-        <input type="text" name="{{ form.customer.name }}" maxlength="{{ form.customer.field.max_length }}" required value="{% if form.customer.value != None %}{{ form.customer.value }}{% endif %}" id="{{ form.customer.id_for_label }}" class="form-control {% if form.customer.errors %}is-invalid{% endif %}" />
+        <input type="text" name="{{ form.customer.name }}" maxlength="{{ form.customer.field.max_length }}" required value="{{ form.customer.value }}" id="{{ form.customer.id_for_label }}" class="form-control {% if form.customer.errors %}is-invalid{% endif %}" />
       </div>
     </div>
     <!-- recipes -->
@@ -43,8 +43,22 @@
       <div id="recipeBlock">
         <label for="{{ form.recipes.id_for_label }}">{{ form.recipes.label }}:</label>
         <select name="{{ form.recipes.name }}" required id="{{ form.recipes.id_for_label }}" class="form-control">
-          {% get_recipe_options %}
+          {% get_recipe_options form.recipes.value %}
         </select>
+        {% for field in form %}
+          {% if field.name|is_addedRecipe %}
+            {% if field.errors %}
+              <ul class="alert alert-danger" role="alert">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+              </ul>
+            {% endif %}
+            <select name="{{ field.name }}" id="{{ field.name }}" class="form-control">
+              {% get_recipe_options field.value %}
+            </select>
+          {% endif %}
+        {% endfor %}
       </div>
       <button id="addRecipe" type="button" class="btn btn-custom-blue" style="margin-top:5px">Add Another Recipe</button>
     </div>
@@ -52,8 +66,16 @@
     <!-- delivery -->
     <div class="fieldWrapper">
       <div class="form-check">
-        <input type="checkbox" name="{{ form.requires_delivery.name }}" class="form-check-input" id="{{ form.requires_delivery.id_for_label }}">
+        <input type="checkbox" name="{{ form.requires_delivery.name }}" class="form-check-input" id="{{ form.requires_delivery.id_for_label }}" {% if form.requires_delivery.value %}checked{% endif %}>
         <label class="form-check-label" for="{{ form.requires_delivery.id_for_label }}">Check if delivery is required</label>
+      </div>
+    </div>
+    <br>
+    <!-- deposit -->
+    <div class="fieldWrapper">
+      <div class="form-check">
+        <input type="checkbox" name="{{ form.deposit_paid.name }}" class="form-check-input" id="{{ form.deposit_paid.id_for_label }}" {% if form.deposit_paid.value %}checked{% endif %}>
+        <label class="form-check-label" for="{{ form.deposit_paid.id_for_label }}">Check if deposit has been paid (${{ form.deposit.value }})</label>
       </div>
     </div>
     <br>
@@ -68,7 +90,7 @@
       {% endif %}
       <div class="form-group">
         <label for="{{ form.delivery_date.id_for_label }}">{{ form.delivery_date.label }}:</label>
-        <input type="date" name="{{ form.delivery_date.name }}" id="{{ form.delivery_date.id_for_label }}" value="{% get_date %}" class="form-control {% if form.delivery_date.errors %}is-invalid{% endif %}">
+        <input type="date" name="{{ form.delivery_date.name }}" id="{{ form.delivery_date.id_for_label }}" value="{{ form.delivery_date.value|date:'Y-m-d' }}" class="form-control {% if form.delivery_date.errors %}is-invalid{% endif %}">
       </div>
     </div>
     <!-- notes -->
@@ -82,7 +104,7 @@
       {% endif %}
       <div class="form-group">
         <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}:</label>
-        <textarea name="{{ form.notes.name }}" id="{{ form.notes.id_for_label }}" class="form-control" rows="3">{% if form.notes.value != None %}{{ form.notes.value }}{% endif %}</textarea>
+        <textarea name="{{ form.notes.name }}" id="{{ form.notes.id_for_label }}" class="form-control" rows="3">{% if form.notes.value %}{{ form.notes.value }}{% endif %}</textarea>
       </div>
     </div>
     <button type="submit" value="Submit" class="btn btn-custom-green">Submit</button>
@@ -95,12 +117,13 @@
 <script>
 //create Recipe options for select elements
 var recipeDict = {% get_recipes %};
-var recipeOptions = '<option value="" selected>Select a recipe</option>';
+
+var recipeOptions = '<option value="">Select a recipe</option>'; 
 for(id in recipeDict){
     recipeOptions += '<option value="'+id+'">'+recipeDict[id]+'</option>';
 }
 //create new Recipe select element on button click
-var counter = 1;
+var counter = {{ form.recipe_counter.value }};
 $("#addRecipe").on('click', function() {
     var new_select = $( "<select>", {
             html: recipeOptions,
@@ -111,5 +134,6 @@ $("#addRecipe").on('click', function() {
         new_select.appendTo("#recipeBlock");
     counter++;
 });
+
 </script>
 {% endblock %}

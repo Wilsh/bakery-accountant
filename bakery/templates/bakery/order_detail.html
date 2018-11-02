@@ -15,21 +15,20 @@
         <dl>
           <dt>Recipes:</dt><dd>
             {% for recipe in recipes %}
-              {{ recipe.quantity }} <a href="{% url 'bakery:recipe_detail' recipe.for_recipe.pk %}">{{ recipe.for_recipe.name }}</a>
+              {{ recipe.quantity }} <a href="{% url 'bakery:recipe-detail' recipe.for_recipe.pk %}">{{ recipe.for_recipe.name }}</a><br>
             {% endfor %}
           </dd>
           <dt>Price:</dt><dd>${{ order_info.quoted_price }}</dd>
           <dt>Deposit:</dt><dd>${{ order_info.deposit }}</dd>
+          <dt>Deposit paid?</dt><dd>{% if order_info.deposit_paid %}Yes{% else %}No{% endif %}</dd>
           <dt>Delivery date:</dt><dd>{{ order_info.delivery_date }}</dd>
-          {% if order_info.requires_delivery %}
-          <dt>Delivery Charge:</dt><dd>$15</dd>
-          {% endif %}
+          <dt>Requires delivery?</dt><dd>{% if order_info.requires_delivery %}Yes{% else %}No{% endif %}</dd>
           <dt>Ingredient Cost:</dt><dd>${{ cost }}</dd>
           <dt>Notes:</dt><dd>{% if order_info.notes %}{{ order_info.notes }}{% else %}None{% endif %}</dd>
         </dl>
       </div>
       <div class="card-footer bg-transparent">
-        <button class="btn btn-custom-blue" href="#">Edit</button>
+        <a class="btn btn-custom-blue" href="{% url 'bakery:edit-order' order_info.pk %}">Edit</a>
         <button class="btn btn-custom-pink" data-toggle="modal" data-target="#deleteModal">Delete</button>
       </div>
     </div>

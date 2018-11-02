@@ -13,7 +13,7 @@
     </tr>
   {% for component in component_list %}
     <tr>
-      <td><a href="{% url 'bakery:component_detail' component.pk %}">{{ component.name }}</a></td>
+      <td><a href="{% url 'bakery:component-detail' component.pk %}">{{ component.name }}</a></td>
       <td>{{ component.get_component_type_display }}</td>
     </tr>
   {% endfor %}
