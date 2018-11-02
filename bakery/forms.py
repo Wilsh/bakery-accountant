@@ -243,7 +243,10 @@ class OrderForm(forms.Form):
     recipes = forms.ModelChoiceField(queryset=Recipe.objects.all(), empty_label="Select a recipe")
     delivery_date = forms.DateField()
     requires_delivery = forms.BooleanField(required=False, widget=forms.CheckboxInput)
+    deposit = forms.IntegerField(required=False)
+    deposit_paid = forms.BooleanField(required=False, widget=forms.CheckboxInput)
     notes = forms.CharField(label='Notes', required=False, widget=forms.Textarea)
+    recipe_counter = forms.IntegerField(required=False)
     
     def __init__(self, *args, **kwargs):
         do_more = True
@@ -256,4 +259,4 @@ class OrderForm(forms.Form):
             #add fields for additional recipes
             for item in recipes:
                 if recipes[item] != '':
-                    self.fields[item] = forms.ModelChoiceField(queryset=Recipe.objects.all(), empty_label="Select a recipe")
+                    self.fields[item] = forms.ModelChoiceField(queryset=Recipe.objects.all(), required=False, empty_label="Select a recipe")

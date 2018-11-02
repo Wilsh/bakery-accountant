@@ -1,0 +1,4 @@
+<option value="">Select a recipe</option>
+{% for key, recipe in name.items %}
+  <option value="{{ key }}"{% if key == pk %} selected{% endif %}>{{ recipe }}</option>
+{% endfor %}

@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from decimal import Decimal
@@ -73,18 +74,20 @@ class OrderDetailView(LoginRequiredMixin, generic.DetailView):
         recipe_list = []
         for order_quantity in OrderQuantity.objects.filter(for_order=context['order_info']):
             recipe_list.append(order_quantity)
-            cost += order_quantity.for_recipe.cost
+            cost += order_quantity.for_recipe.cost * order_quantity.get_quantity()
         context['recipes'] = recipe_list
         context['cost'] = cost
         return context
 
+@require_http_methods(["GET", "POST"])
 @login_required
 def create_grocery(request):
     if request.method == 'POST':
         form = GroceryForm(request.POST)
         print(request.POST)
         if form.is_valid():
-            item = Grocery(name = form.cleaned_data['name'],
+            item = Grocery(
+                    name = form.cleaned_data['name'],
                     cost = form.cleaned_data['cost'],
                     cost_amount = form.cleaned_data['cost_amount'],
                     units = form.cleaned_data['units'],
@@ -111,6 +114,7 @@ def revert_name(str):
 def component_sort_post_to_dict(post):
     '''Given a QueryDict.dict() object, return a dictionary of list pairs where each
     pair is a property belonging to a related Grocery and in the order: amount, units
+    e.g. {Grocery.name:[['custom_amount_foo', 2], ['custom_units_foo', 'tsp']]}
     '''
     dict = {}
     for entry in sorted(post):
@@ -124,6 +128,7 @@ def component_sort_post_to_dict(post):
                 dict[name] = [[entry, post[entry]]]
     return dict
 
+@require_http_methods(["GET", "POST"])
 @login_required
 def create_component(request):
     added_fields_context = {}
@@ -133,7 +138,8 @@ def create_component(request):
         form = ComponentForm(request.POST, extra=added_fields_context)
         if form.is_valid():
             #create new Component
-            item = Component(name = form.cleaned_data['name'],
+            item = Component(
+                    name = form.cleaned_data['name'],
                     component_type = form.cleaned_data['component_type'],
                     notes = form.cleaned_data['notes']
                     )
@@ -155,13 +161,15 @@ def create_component(request):
         form = ComponentForm()
     return render(request, 'bakery/addcomponent.html', {'form': form, 'extra': added_fields_context})
 
+@require_http_methods(["GET", "POST"])
 @login_required
 def create_recipe(request):
     if request.method == 'POST':
         form = RecipeForm(request.POST, request.FILES)
         if form.is_valid():
             #create new Recipe
-            item = Recipe(name = form.cleaned_data['name'],
+            item = Recipe(
+                    name = form.cleaned_data['name'],
                     time_estimate = form.cleaned_data['time_estimate'],
                     time_actual = form.cleaned_data['time_estimate'] if request.POST['hasBeenMadeBefore'] == 'yes' else 0,
                     notes = form.cleaned_data['notes']
@@ -201,6 +209,7 @@ def order_sort_post_to_dict(post):
             dict[key] = post[key]
     return dict
 
+@require_http_methods(["GET", "POST"])
 @login_required
 def create_order(request):
     added_fields_context = {}
@@ -210,7 +219,8 @@ def create_order(request):
         form = OrderForm(request.POST, extra=added_fields_context)
         if form.is_valid():
             #print(request.POST)
-            order = Order(customer = form.cleaned_data['customer'],
+            order = Order(
+                    customer = form.cleaned_data['customer'],
                     delivery_date = form.cleaned_data['delivery_date'],
                     requires_delivery = form.cleaned_data['requires_delivery'],
                     notes = form.cleaned_data['notes']
@@ -233,23 +243,81 @@ def create_order(request):
             #print('############################################')
             #for key in form.cleaned_data.items():
                 #print(key)
-            order.calculate_quoted_price()
+            order.calculate_prices()
             return HttpResponseRedirect(reverse('bakery:view-orders'))
         #print(request.POST)
     else:
         form = OrderForm()
     return render(request, 'bakery/addorder.html', {'form': form, 'extra': added_fields_context})
+
+@require_http_methods(["GET", "POST"])
+@login_required
+def edit_order(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    added_fields_context = {}
+    if request.method == 'POST':
+        #manage dynamically-added fields
+        added_fields_context = order_sort_post_to_dict(request.POST.dict())
+        form = OrderForm(request.POST, extra=added_fields_context)
+        if form.is_valid():
+            #clear existing OrderQuantity relations
+            OrderQuantity.objects.filter(for_order=order).delete()
+            #update Order
+            order.customer = form.cleaned_data['customer']
+            order.delivery_date = form.cleaned_data['delivery_date']
+            order.requires_delivery = form.cleaned_data['requires_delivery']
+            order.deposit_paid = form.cleaned_data['deposit_paid']
+            order.notes = form.cleaned_data['notes']
+            order.save()
+            #use a dictionary to count number of occurences of each recipe
+            recipeDict = Counter()
+            recipeDict[form.cleaned_data['recipes']] += 1
+            for key in form.cleaned_data:
+                if key.startswith('addedRecipe'):
+                    recipeDict[form.cleaned_data[key]] += 1
+            #use count info to link Order to each Recipe through an OrderQuantity
+            for recipe in recipeDict:
+                order_quantity = OrderQuantity(
+                        for_recipe = recipe,
+                        for_order = order,
+                        quantity = recipeDict[recipe]
+                        )
+                order_quantity.save()
+            order.calculate_prices()
+            return HttpResponseRedirect(reverse('bakery:order-detail', args=(pk,))) 
+    else:
+        oqs = OrderQuantity.objects.filter(for_order=order)
+        form_info = {
+                'customer':order.customer,
+                'delivery_date':order.delivery_date,
+                'requires_delivery':order.requires_delivery,
+                'deposit':order.deposit,
+                'deposit_paid':order.deposit_paid,
+                'notes':order.notes,
+                'recipes':oqs[0].for_recipe.pk,
+                'recipe_counter':1
+        }
+        skipped = False
+        add = 1
+        for count, oq in enumerate(oqs):
+            qty = oq.quantity
+            add -= 1
+            while qty > 0:
+                #ignore first recipe; its details are sent in form_info
+                if skipped:
+                    added_fields_context['addedRecipe'+str(count + add)] = oq.for_recipe.pk
+                    form_info['addedRecipe'+str(count + add)] = oq.for_recipe.pk
+                    form_info['recipe_counter'] = count + add + 1
+                else:
+                    skipped = True
+                add += 1
+                qty -= 1
+        form = OrderForm(form_info, extra=added_fields_context)
+    return render(request, 'bakery/editorder.html', {'form': form, 'extra': added_fields_context})
     
+@require_http_methods(["POST"])
 @login_required
 def delete_order(request):
-    if request.method == 'POST':
-        try:
-            order = Order.objects.get(pk=request.POST['pk'])
-            order.delete()
-        except KeyError:
-            #print('no key in post')
-            pass
-        except Order.DoesNotExist:
-            #print('order not found')
-            pass
+    order = get_object_or_404(Order, pk=request.POST['pk'])
+    order.delete()
     return HttpResponseRedirect(reverse('bakery:home'))

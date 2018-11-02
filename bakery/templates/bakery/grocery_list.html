@@ -14,7 +14,7 @@
     </tr>
   {% for grocery in grocery_list %}
     <tr>
-      <td><a href="{% url 'bakery:grocery_detail' grocery.pk %}">{{ grocery.name }}</a></td>
+      <td><a href="{% url 'bakery:grocery-detail' grocery.pk %}">{{ grocery.name }}</a></td>
       <td>${{ grocery.cost }}</td>
       <td>{{ grocery.cost_amount|get_common_fraction }} {{ grocery.units }}</td>
     </tr>

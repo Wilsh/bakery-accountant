@@ -148,6 +148,9 @@ class Recipe(models.Model):
     
     def get_price(self):
         return self.price
+        
+    def get_cost(self):
+        return self.cost
 
 class Order(models.Model):
     '''The top-level organizational model. An Order contains one or more Recipes,
@@ -160,6 +163,8 @@ class Order(models.Model):
     delivery_date = models.DateField()
     requires_delivery = models.BooleanField(default=False)
     quoted_price = models.PositiveSmallIntegerField(default=0)
+    deposit = models.PositiveSmallIntegerField(default=0)
+    deposit_paid = models.BooleanField(default=False)
     price_paid = models.PositiveSmallIntegerField(default=0)
     postmortem_complete = models.BooleanField(default=False)
     notes = models.TextField(default='', blank=True)
@@ -170,16 +175,26 @@ class Order(models.Model):
     def __str__(self): 
         return f"Order for {self.customer}"
 
-    def calculate_quoted_price(self):
+    def calculate_prices(self):
         total = 0
+        deposit = 0
         for item in self.recipes.all():
             multiplier = item.orderquantity_set.get(for_order=self).get_quantity()
             total += item.get_price() * multiplier
-        if self.requires_delivery:
-            total += 15
+            deposit += item.get_cost() * multiplier
         total = int(total)
         while total % 5 != 0:
             total += 1
+        #set deposit to be divisible by five and at least the ingredient cost or 30% of the total cost (whichever is higher)
+        if not self.deposit_paid:
+            if deposit < 0.3 * total:
+                deposit = 0.3 * total
+            deposit = ceil(deposit)
+            while deposit % 5 != 0:
+                deposit += 1
+            self.deposit = deposit
+        if self.requires_delivery:
+            total += 15
         self.quoted_price = total
         self.save()
 

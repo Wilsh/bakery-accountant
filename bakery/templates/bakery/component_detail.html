@@ -15,7 +15,7 @@
         <ul>
           {% for grocery in component_info.groceries.all %}
             {% get_ingredient grocery component_info as ingredient %}
-            <li>{{ ingredient.amount|get_common_fraction }} {{ ingredient.units }} <a href="{% url 'bakery:grocery_detail' ingredient.for_grocery.pk %}">{{ grocery.name }}</a></li>
+            <li>{{ ingredient.amount|get_common_fraction }} {{ ingredient.units }} <a href="{% url 'bakery:grocery-detail' ingredient.for_grocery.pk %}">{{ grocery.name }}</a></li>
           {% endfor %}
         </ul>
         </dd>
