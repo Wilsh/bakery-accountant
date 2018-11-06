@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^add/order/$', views.create_order, name='create-order'),
     url(r'^edit/recipe/(?P<pk>[0-9]+)/$', views.edit_recipe, name='edit-recipe'),
     url(r'^edit/order/(?P<pk>[0-9]+)/$', views.edit_order, name='edit-order'),
+    url(r'^delete/recipe/$', views.delete_recipe, name='delete-recipe'),
     url(r'^delete/order/$', views.delete_order, name='delete-order'),
     url(r'^groceries/detail/(?P<pk>[0-9]+)/$', views.GroceryDetailView.as_view(), name='grocery-detail'),
     url(r'^components/detail/(?P<pk>[0-9]+)/$', views.ComponentDetailView.as_view(), name='component-detail'),

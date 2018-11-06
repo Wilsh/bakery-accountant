@@ -265,6 +265,26 @@ def edit_recipe(request, pk):
         form = RecipeForm(form_info, edit=recipe.name)
     return render(request, 'bakery/editrecipe.html', {'form': form, 'context':context})
 
+@require_http_methods(["POST"])
+@login_required
+def delete_recipe(request):
+    pk=request.POST['pk']
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if recipe.can_be_deleted():
+        if recipe.user_uploaded_image:
+            #delete related images
+            try:
+                remove(recipe.image.path)
+            except FileNotFoundError:
+                pass
+            try:
+                remove(settings.MEDIA_ROOT.rsplit('/', 2)[0]+recipe.image_thumb)
+            except FileNotFoundError:
+                pass
+        recipe.delete()
+        return HttpResponseRedirect(reverse('bakery:view-recipes'))
+    return HttpResponseRedirect(reverse('bakery:recipe-detail', args=(pk,)))
+
 def order_sort_post_to_dict(post):
     '''Given a QueryDict.dict() object, return a dictionary of Recipe model ids.
     '''

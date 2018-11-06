@@ -154,6 +154,9 @@ class Recipe(models.Model):
         orders = Order.objects.filter(delivery_date__gte=date.today(), recipes=self)
         for order in orders:
             order.calculate_prices()
+            
+    def can_be_deleted(self):
+        return False if Order.objects.filter(recipes=self) else True
     
     def get_price(self):
         return self.price

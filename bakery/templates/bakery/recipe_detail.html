@@ -34,8 +34,36 @@
       </div>
       <div class="card-footer bg-transparent">
         <a class="btn btn-custom-blue" href="{% url 'bakery:edit-recipe' recipe_info.pk %}">Edit</a>
+        {% if recipe_info.can_be_deleted %}
+          <button class="btn btn-custom-pink" data-toggle="modal" data-target="#deleteModal">Delete</button>
+          <!-- Modal -->
+          <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Confirm Delete Recipe</h5>
+                  <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <h3>Are you sure you want to delete this recipe for {{ recipe_info.name }}?</h3>
+                </div>
+                <div class="modal-footer">
+                  <form action="{% url 'bakery:delete-recipe' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="pk" value="{{ recipe_info.pk }}">
+                    <button type="submit" class="btn btn-custom-pink">Delete</button>
+                    <button type="button" class="btn btn-custom-blue" data-dismiss="modal">Cancel</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
   <div style="height:15px"></div>
+  
 {% endblock %}
