@@ -1,0 +1,162 @@
+{% extends "bakery/base.html" %}
+
+{% block title %}
+  Edit Recipe
+{% endblock %}
+
+{% block content %}
+  <div class="translucent">
+  <h1 class="text-center">Edit Recipe &quot;{{ form.oldname }}&quot;</h1>
+  <form enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors.errors %}
+      <ul class="alert alert-danger" role="alert">
+      {% for error in form.non_field_errors.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+    <!-- name -->
+    <div class="fieldWrapper">
+      {% if form.name.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.name.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}:</label>
+        <input type="text" name="{{ form.name.name }}" maxlength="{{ form.name.field.max_length }}" required value="{{ form.name.value }}" id="{{ form.name.id_for_label }}" class="form-control{% if form.name.errors %} is-invalid{% endif %}" />
+      </div>
+    </div>
+    <!-- components -->
+    <div class="fieldWrapper">
+      {% if form.component_baked.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.component_baked.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.component_baked.id_for_label }}">{{ form.component_baked.label }}:</label>
+        <select name="{{ form.component_baked.name }}" multiple="multiple" id="{{ form.component_baked.id_for_label }}" class="form-control">
+          {% for item in form.component_baked %}
+            {{ item }}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="fieldWrapper">
+      {% if form.component_icing.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.component_icing.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.component_icing.id_for_label }}">{{ form.component_icing.label }}:</label>
+        <select name="{{ form.component_icing.name }}" multiple="multiple" id="{{ form.component_icing.id_for_label }}" class="form-control">
+          {% for item in form.component_icing %}
+            {{ item }}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="fieldWrapper">
+      {% if form.component_decoration.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.component_decoration.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.component_decoration.id_for_label }}">{{ form.component_decoration.label }}:</label>
+        <select name="{{ form.component_decoration.name }}" multiple="multiple" id="{{ form.component_decoration.id_for_label }}" class="form-control">
+          {% for item in form.component_decoration %}
+            {{ item }}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="fieldWrapper">
+      {% if form.component_other.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.component_other.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.component_other.id_for_label }}">{{ form.component_other.label }}:</label>
+        <select name="{{ form.component_other.name }}" multiple="multiple" id="{{ form.component_other.id_for_label }}" class="form-control">
+          {% for item in form.component_other %}
+            {{ item }}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <!-- time estimate -->
+    <div class="fieldWrapper">
+      {% if form.time_estimate.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.time_estimate.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.time_estimate.id_for_label }}">{{ form.time_estimate.label }}:</label>
+        <input name="{{ form.time_estimate.name }}" id="{{ form.time_estimate.id_for_label }}" maxlength="{{ form.time_estimate.field.max_length }}" required class="form-control" value="{% if form.time_estimate.value != None %}{{ form.time_estimate.value }}{% endif %}" type="text" />
+      </div>
+      <div class="form-group">
+        <label>Have you made this recipe before?</label>
+        <div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="hasBeenMadeBefore" id="inlineRadio1" value="yes"{% if context.made_before %} checked{% endif %}>
+          <label class="form-check-label" for="inlineRadio1">Yes</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="hasBeenMadeBefore" id="inlineRadio2" value="no"{% if not context.made_before %} checked{% endif %}>
+          <label class="form-check-label" for="inlineRadio2">No</label>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- image -->
+    <div class="fieldWrapper">
+      {% if form.image.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.image.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+        <input type="file" name="file" class="form-control-file" id="{{ form.image.id_for_label }}">
+      </div>
+    </div>
+    <!-- notes -->
+    <div class="fieldWrapper">
+      {% if form.notes.errors %}
+        <ul class="alert alert-danger" role="alert">
+        {% for error in form.notes.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}:</label>
+        <textarea name="{{ form.notes.name }}" id="{{ form.notes.id_for_label }}" class="form-control" rows="3">{% if form.notes.value != None %}{{ form.notes.value }}{% endif %}</textarea>
+      </div>
+    </div>
+
+    <button type="submit" value="Submit" class="btn btn-custom-green">Submit</button>
+  </form>
+  </div>
+  <div style="height:15px"></div>
+{% endblock %}

@@ -210,6 +210,19 @@ class RecipeForm(forms.Form):
     time_estimate = forms.CharField(label='Estimated time to complete (hours)', max_length=10, validators=[validate_str_as_decimal])
     image = forms.ImageField(label='Image (optional)', required=False)
     notes = forms.CharField(label='Notes', required=False, widget=forms.Textarea)
+    editing = False
+    oldname = ''
+
+    def __init__(self, *args, **kwargs):
+        do_more = True
+        try:
+            name = kwargs.pop('edit')
+        except KeyError:
+            do_more = False
+        super(RecipeForm, self).__init__(*args, **kwargs)
+        if do_more:
+            self.editing = True
+            self.oldname = name
 
     def clean(self):
         cleaned_data = super(RecipeForm, self).clean()
@@ -226,11 +239,14 @@ class RecipeForm(forms.Form):
     def clean_name(self):
         name = self.cleaned_data['name']
         try:
-            Recipe.objects.get(name__iexact=name)
-            raise forms.ValidationError(
-                _("A recipe named \"%(name)s\" already exists."),
-                params={'name': name},
-                )
+            if not self.editing or self.oldname.upper() != name.upper():
+                Recipe.objects.get(name__iexact=name)
+                raise forms.ValidationError(
+                    _("A recipe named \"%(name)s\" already exists."),
+                    params={'name': name},
+                    )
+            else:
+                raise Recipe.DoesNotExist
         except Recipe.DoesNotExist:
             name = ' '.join(word[0].upper() + word[1:] for word in name.split())
         return name
