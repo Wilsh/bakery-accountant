@@ -6,6 +6,7 @@ from django.conf import settings
 from decimal import Decimal
 from math import ceil
 import hashlib
+from datetime import date
 
 UNIT_TYPES = (
     ('ct', 'Count'),
@@ -118,6 +119,7 @@ class Recipe(models.Model):
     price = models.PositiveSmallIntegerField(default=0)
     image = models.ImageField(upload_to='originals/', default='originals/default.jpg')
     image_thumb = models.CharField(max_length=300, default=settings.MEDIA_URL+'thumbnails/default.jpg')
+    user_uploaded_image = models.BooleanField(default=False)
     notes = models.TextField(default='', blank=True)
 
     class Meta:
@@ -145,6 +147,13 @@ class Recipe(models.Model):
         self._calculate_cost()
         self._calculate_price()
         self.save()
+        
+    def update(self):
+        self.calculate_values()
+        #update any upcoming Orders using this Recipe
+        orders = Order.objects.filter(delivery_date__gte=date.today(), recipes=self)
+        for order in orders:
+            order.calculate_prices()
     
     def get_price(self):
         return self.price

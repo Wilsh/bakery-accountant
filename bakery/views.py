@@ -11,6 +11,7 @@ from decimal import Decimal
 from datetime import date
 from collections import Counter
 from PIL import Image
+from os import remove
 
 from bakery.models import Grocery, Ingredient, Component, Recipe, Order, OrderQuantity
 from .forms import GroceryForm, ComponentForm, RecipeForm, OrderForm, parse_str_to_decimal
@@ -176,6 +177,7 @@ def create_recipe(request):
                     )
             if request.FILES:
                 item.image = request.FILES['file']
+                item.user_uploaded_image = True
             item.save()
             #create image thumbnail
             if request.FILES:
@@ -199,6 +201,69 @@ def create_recipe(request):
     else:
         form = RecipeForm()
     return render(request, 'bakery/addrecipe.html', {'form': form})
+    
+@require_http_methods(["GET", "POST"])
+@login_required
+def edit_recipe(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    context = {}
+    context['made_before'] = True if recipe.time_actual else False
+    if request.method == 'POST':
+        form = RecipeForm(request.POST, request.FILES, edit=recipe.name)
+        if form.is_valid():
+            #update Recipe
+            recipe.name = form.cleaned_data['name']
+            recipe.time_estimate = form.cleaned_data['time_estimate']
+            recipe.time_actual = form.cleaned_data['time_estimate'] if request.POST['hasBeenMadeBefore'] == 'yes' else 0
+            recipe.notes = form.cleaned_data['notes']
+            if request.FILES:
+                if recipe.user_uploaded_image:
+                    #delete old images
+                    try:
+                        remove(recipe.image.path)
+                    except FileNotFoundError:
+                        pass
+                    try:
+                        remove(settings.MEDIA_ROOT.rsplit('/', 2)[0]+recipe.image_thumb)
+                    except FileNotFoundError:
+                        pass
+                recipe.image = request.FILES['file']
+                recipe.user_uploaded_image = True
+            recipe.save()
+            #create image thumbnail
+            if request.FILES:
+                file = recipe.image.name.rsplit('/', 1)[1]
+                img = Image.open(settings.MEDIA_ROOT + recipe.image.name)
+                img.thumbnail((500,500))
+                img.save(settings.MEDIA_ROOT + 'thumbnails/' + file)
+                recipe.image_thumb = settings.MEDIA_URL + 'thumbnails/' + file
+                recipe.save()
+            #remove old Components
+            recipe.components.clear()
+            #link Recipe to new Components
+            for component in form.cleaned_data.get('component_baked'):
+                recipe.components.add(component)
+            for component in form.cleaned_data.get('component_icing'):
+                recipe.components.add(component)
+            for component in form.cleaned_data.get('component_decoration'):
+                recipe.components.add(component)
+            for component in form.cleaned_data.get('component_other'):
+                recipe.components.add(component)
+            recipe.update()
+            return HttpResponseRedirect(reverse('bakery:recipe-detail', args=(pk,)))
+    else:
+        form_info = {
+                'name':recipe.name,
+                'component_baked': recipe.components.filter(component_type='B'),
+                'component_icing': recipe.components.filter(component_type='I'),
+                'component_decoration': recipe.components.filter(component_type='D'),
+                'component_other': recipe.components.filter(component_type='O'),
+                'time_estimate':recipe.time_estimate,
+                'image':recipe.image,
+                'notes':recipe.notes,
+        }
+        form = RecipeForm(form_info, edit=recipe.name)
+    return render(request, 'bakery/editrecipe.html', {'form': form, 'context':context})
 
 def order_sort_post_to_dict(post):
     '''Given a QueryDict.dict() object, return a dictionary of Recipe model ids.
