@@ -111,6 +111,9 @@ class Component(models.Model):
         recipes = Recipe.objects.filter(components=self)
         for recipe in recipes:
             recipe.update()
+
+    def can_be_deleted(self):
+        return False if Recipe.objects.filter(components=self) else True
     
     def get_cost(self):
         return self.cost

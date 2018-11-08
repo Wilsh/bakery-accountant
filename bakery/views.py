@@ -194,7 +194,7 @@ def edit_component(request, pk):
                     ingredient.save()
             component.update()
             return HttpResponseRedirect(reverse('bakery:component-detail', args=(pk,)))
-    else:#Grocery.name:[['custom_amount_foo', 2], ['custom_units_foo', 'tsp']]
+    else:
         ingredients = Ingredient.objects.filter(for_component=component)
         form_info = {
                 'name':component.name,
@@ -213,6 +213,16 @@ def edit_component(request, pk):
         form_info['groceries'] = grocery_list
         form = ComponentForm(form_info, extra=added_fields_context, edit=component.name)
     return render(request, 'bakery/addcomponent.html', {'form': form, 'extra': added_fields_context})
+
+@require_http_methods(["POST"])
+@login_required
+def delete_component(request):
+    pk=request.POST['pk']
+    component = get_object_or_404(Component, pk=pk)
+    if component.can_be_deleted():
+        component.delete()
+        return HttpResponseRedirect(reverse('bakery:view-components'))
+    return HttpResponseRedirect(reverse('bakery:component-detail', args=(pk,)))
 
 @require_http_methods(["GET", "POST"])
 @login_required
@@ -355,7 +365,6 @@ def create_order(request):
         added_fields_context = order_sort_post_to_dict(request.POST.dict())
         form = OrderForm(request.POST, extra=added_fields_context)
         if form.is_valid():
-            #print(request.POST)
             order = Order(
                     customer = form.cleaned_data['customer'],
                     delivery_date = form.cleaned_data['delivery_date'],
@@ -371,18 +380,13 @@ def create_order(request):
                     recipeDict[form.cleaned_data[key]] += 1
             #use count info to link new Order to each Recipe through an OrderQuantity
             for recipe in recipeDict:
-                #print(f"recipe: {recipe} order: {order} quantity: {recipeDict[recipe]}")
                 order_quantity = OrderQuantity(for_recipe = recipe,
                         for_order = order,
                         quantity = recipeDict[recipe]
                         )
                 order_quantity.save()
-            #print('############################################')
-            #for key in form.cleaned_data.items():
-                #print(key)
             order.calculate_prices()
             return HttpResponseRedirect(reverse('bakery:view-orders'))
-        #print(request.POST)
     else:
         form = OrderForm()
     return render(request, 'bakery/addorder.html', {'form': form, 'extra': added_fields_context})
