@@ -1,4 +1,5 @@
 {% extends "bakery/base.html" %}
+{% load bakery_extras %}
 
 {% block title %}
   Edit Recipe
@@ -110,7 +111,7 @@
       {% endif %}
       <div class="form-group">
         <label for="{{ form.time_estimate.id_for_label }}">{{ form.time_estimate.label }}:</label>
-        <input name="{{ form.time_estimate.name }}" id="{{ form.time_estimate.id_for_label }}" maxlength="{{ form.time_estimate.field.max_length }}" required class="form-control" value="{% if form.time_estimate.value != None %}{{ form.time_estimate.value }}{% endif %}" type="text" />
+        <input name="{{ form.time_estimate.name }}" id="{{ form.time_estimate.id_for_label }}" maxlength="{{ form.time_estimate.field.max_length }}" required class="form-control" value="{% if form.time_estimate.value != None %}{{ form.time_estimate.value|get_common_fraction }}{% endif %}" type="text" />
       </div>
       <div class="form-group">
         <label>Have you made this recipe before?</label>

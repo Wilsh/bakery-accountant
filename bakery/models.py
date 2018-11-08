@@ -104,6 +104,13 @@ class Component(models.Model):
             total += item.ingredient_set.get(for_component=self).get_cost()
         self.cost = total
         self.save()
+        
+    def update(self):
+        self.calculate_cost()
+        #update any Recipes using this Component
+        recipes = Recipe.objects.filter(components=self)
+        for recipe in recipes:
+            recipe.update()
     
     def get_cost(self):
         return self.cost

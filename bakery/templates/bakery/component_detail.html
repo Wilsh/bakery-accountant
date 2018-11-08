@@ -22,5 +22,5 @@
       <dt>Notes:</dt><dd>{% if component_info.notes %}{{ component_info.notes }}{% else %}None{% endif %}</dd>
     </dl>
   </div>
-  <a class="btn btn-custom-blue" href="#">Edit</a>
+  <a class="btn btn-custom-blue" href="{% url 'bakery:edit-component' component_info.pk %}">Edit</a>
 {% endblock %}

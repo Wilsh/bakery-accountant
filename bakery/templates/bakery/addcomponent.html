@@ -2,12 +2,12 @@
 {% load bakery_extras %}
 
 {% block title %}
-  Add Component
+  {% if form.editing %}Edit Component{% else %}Add Component{% endif %}
 {% endblock %}
 
 {% block content %}
   <div class="translucent">
-  <h1 class="text-center">Add a Recipe Component</h1>
+  <h1 class="text-center">{% if form.editing %}Edit Component &quot;{{ form.oldname }}&quot;{% else %}Add a Recipe Component{% endif %}</h1>
   <form method="post">
     {% csrf_token %}
     {% if form.non_field_errors.errors %}
@@ -86,8 +86,8 @@
                   {% endif %}
                   <div class="row {{ field.html_name|revert_name }}">
                     <h4 class="col-sm-3">{{ field.html_name|get_grocery_name }}</h4>
-                    <input type="text" name="{{ field.html_name }}" maxlength="{{ field.field.max_length }}" required id="{{ field.html_name }}" value="{{ field.value }}" class="form-control col-sm-2 {% if field.errors %}is-invalid{% endif %}" placeholder="Enter amount" />
-                {% else %}
+                    <input type="text" name="{{ field.html_name }}" maxlength="{{ field.field.max_length }}" required id="{{ field.html_name }}" value="{% if form.errors %}{{ field.value }}{% else %}{{ field.value|get_common_fraction }}{% endif %}" class="form-control col-sm-2 {% if field.errors %}is-invalid{% endif %}" placeholder="Enter amount" />
+                {% else %}{# custom_units #}
                     {% if field.errors %}
                       <ul class="alert alert-danger" role="alert">
                       {% for error in field.errors %}

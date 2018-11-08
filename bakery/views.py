@@ -150,7 +150,8 @@ def create_component(request):
                 grocery = Grocery.objects.get(name=entry)
                 success, number = parse_str_to_decimal(form.cleaned_data[added_fields_context[entry][0][0]])
                 if success:
-                    ingredient = Ingredient(for_grocery = grocery,
+                    ingredient = Ingredient(
+                        for_grocery = grocery,
                         for_component = item,
                         units = form.cleaned_data[added_fields_context[entry][1][0]],
                         amount = number
@@ -160,6 +161,57 @@ def create_component(request):
             return HttpResponseRedirect(reverse('bakery:view-components'))
     else:
         form = ComponentForm()
+    return render(request, 'bakery/addcomponent.html', {'form': form, 'extra': added_fields_context})
+    
+@require_http_methods(["GET", "POST"])
+@login_required
+def edit_component(request, pk):
+    component = get_object_or_404(Component, pk=pk)
+    added_fields_context = {}
+    if request.method == 'POST':
+        #manage dynamically-added fields
+        added_fields_context = component_sort_post_to_dict(request.POST.dict())
+        form = ComponentForm(request.POST, extra=added_fields_context, edit=component.name)
+        if form.is_valid():
+            #clear existing Ingredient relations
+            Ingredient.objects.filter(for_component=component).delete()
+            #update Component
+            component.name = form.cleaned_data['name']
+            component.component_type = form.cleaned_data['component_type']
+            component.notes = form.cleaned_data['notes']
+            component.save()
+            #link Component with each Grocery through an Ingredient
+            for entry in added_fields_context:
+                grocery = Grocery.objects.get(name=entry)
+                success, number = parse_str_to_decimal(form.cleaned_data[added_fields_context[entry][0][0]])
+                if success:
+                    ingredient = Ingredient(
+                        for_grocery = grocery,
+                        for_component = component,
+                        units = form.cleaned_data[added_fields_context[entry][1][0]],
+                        amount = number
+                    )
+                    ingredient.save()
+            component.update()
+            return HttpResponseRedirect(reverse('bakery:component-detail', args=(pk,)))
+    else:#Grocery.name:[['custom_amount_foo', 2], ['custom_units_foo', 'tsp']]
+        ingredients = Ingredient.objects.filter(for_component=component)
+        form_info = {
+                'name':component.name,
+                'component_type':component.component_type,
+                'notes':component.notes
+        }
+        grocery_list = []
+        for ingredient in ingredients:
+            grocery = ingredient.for_grocery
+            grocery_list.append(grocery)
+            amount = 'custom_amount_' + grocery.hash
+            units = 'custom_units_' + grocery.hash
+            added_fields_context[grocery.name] = [[amount, ingredient.amount], [units, ingredient.units]]
+            form_info[amount] = ingredient.amount
+            form_info[units] = ingredient.units
+        form_info['groceries'] = grocery_list
+        form = ComponentForm(form_info, extra=added_fields_context, edit=component.name)
     return render(request, 'bakery/addcomponent.html', {'form': form, 'extra': added_fields_context})
 
 @require_http_methods(["GET", "POST"])
