@@ -155,13 +155,20 @@ class ComponentForm(forms.Form):
     groceries = forms.ModelMultipleChoiceField(label='Ingredients', queryset=Grocery.objects.all(), to_field_name="name")
     notes = forms.CharField(label='Notes', required=False, widget=forms.Textarea)
     units = forms.ChoiceField(label='Units', choices=UNIT_TYPES, required=False)
+    editing = False
+    oldname = ''
     
     def __init__(self, *args, **kwargs):
         do_more = True
+        is_editing = True
         try:
             amounts = kwargs.pop('extra')
         except KeyError:
             do_more = False
+        try:
+            component_name = kwargs.pop('edit')
+        except KeyError:
+            is_editing = False
         super(ComponentForm, self).__init__(*args, **kwargs)
         if do_more:
             #add fields for each ingredient amount and unit
@@ -170,6 +177,9 @@ class ComponentForm(forms.Form):
                 units_hash_id = amounts[name][1][0]
                 self.fields[amount_hash_id] = forms.CharField(label=amount_hash_id, max_length=10, validators=[validate_str_as_decimal])
                 self.fields[units_hash_id] = forms.ChoiceField(label=units_hash_id, choices=UNIT_TYPES)
+        if is_editing:
+            self.editing = True
+            self.oldname = component_name
     
     def clean(self):
         #validation for units in added fields
@@ -192,11 +202,14 @@ class ComponentForm(forms.Form):
     def clean_name(self):
         name = self.cleaned_data['name']
         try:
-            Component.objects.get(name__iexact=name)
-            raise forms.ValidationError(
-                _("A component named \"%(name)s\" already exists."),
-                params={'name': name},
-                )
+            if not self.editing or self.oldname.upper() != name.upper():
+                Component.objects.get(name__iexact=name)
+                raise forms.ValidationError(
+                    _("A component named \"%(name)s\" already exists."),
+                    params={'name': name},
+                    )
+            else:
+                raise Component.DoesNotExist
         except Component.DoesNotExist:
             name = ' '.join(word[0].upper() + word[1:] for word in name.split())
         return name
