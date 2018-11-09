@@ -59,6 +59,16 @@ class Grocery(models.Model):
         #hash will be used as a CSS class, so ensure it begins with a letter
         self.hash = 'a' + hashlib.md5(self.name.encode('utf-8')).hexdigest()
         self.save()
+    
+    def update(self):
+        self.calculate_values()
+        #update any Components using this Grocery
+        components = Component.objects.filter(groceries=self)
+        for component in components:
+            component.update()
+    
+    def can_be_deleted(self):
+        return False if Component.objects.filter(groceries=self) else True
 
 class Ingredient(models.Model):
     '''Ingredient links a Grocery and Component with information about a
