@@ -38,15 +38,31 @@ class GroceryForm(forms.Form):
         )
     units = forms.ChoiceField(label='Purchase units', choices=UNIT_TYPES)
     default_units = forms.ChoiceField(label='Default units for recipe measurement', choices=UNIT_TYPES)
+    editing = False
+    oldname = ''
+    
+    def __init__(self, *args, **kwargs):
+        is_editing = True
+        try:
+            grocery_name = kwargs.pop('edit')
+        except KeyError:
+            is_editing = False
+        super(GroceryForm, self).__init__(*args, **kwargs)
+        if is_editing:
+            self.editing = True
+            self.oldname = grocery_name
     
     def clean_name(self):
         name = self.cleaned_data['name']
         try:
-            Grocery.objects.get(name__iexact=name)
-            raise forms.ValidationError(
-                _("An ingredient named \"%(name)s\" already exists."),
-                params={'name': name},
-                )
+            if not self.editing or self.oldname.upper() != name.upper():
+                Grocery.objects.get(name__iexact=name)
+                raise forms.ValidationError(
+                    _("An ingredient named \"%(name)s\" already exists."),
+                    params={'name': name},
+                    )
+            else:
+                raise Grocery.DoesNotExist
         except Grocery.DoesNotExist:
             name = ' '.join(word[0].upper() + word[1:] for word in name.split())
         return name
@@ -54,7 +70,8 @@ class GroceryForm(forms.Form):
     def clean_default_units(self):
         if self.cleaned_data['default_units'] == 'ct' and self.cleaned_data['units'] != 'ct':
             raise forms.ValidationError(
-                _("Cannot set Default units to 'Count' if Purchase units is not also 'Count'."))
+                _("Cannot set Default units to 'Count' if Purchase units is not also 'Count'.")
+                )
         return self.cleaned_data['default_units']
 
 def parse_str_to_decimal(str):

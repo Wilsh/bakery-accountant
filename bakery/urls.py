@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^add/component/$', views.create_component, name='create-component'),
     url(r'^add/recipe/$', views.create_recipe, name='create-recipe'),
     url(r'^add/order/$', views.create_order, name='create-order'),
+    url(r'^edit/grocery/(?P<pk>[0-9]+)/$', views.edit_grocery, name='edit-grocery'),
     url(r'^edit/component/(?P<pk>[0-9]+)/$', views.edit_component, name='edit-component'),
     url(r'^edit/recipe/(?P<pk>[0-9]+)/$', views.edit_recipe, name='edit-recipe'),
     url(r'^edit/order/(?P<pk>[0-9]+)/$', views.edit_order, name='edit-order'),

@@ -85,7 +85,6 @@ class OrderDetailView(LoginRequiredMixin, generic.DetailView):
 def create_grocery(request):
     if request.method == 'POST':
         form = GroceryForm(request.POST)
-        print(request.POST)
         if form.is_valid():
             item = Grocery(
                     name = form.cleaned_data['name'],
@@ -99,6 +98,32 @@ def create_grocery(request):
             return HttpResponseRedirect(reverse('bakery:view-groceries'))
     else:
         form = GroceryForm()
+    return render(request, 'bakery/addgrocery.html', {'form': form})
+
+@require_http_methods(["GET", "POST"])
+@login_required
+def edit_grocery(request, pk):
+    grocery = get_object_or_404(Grocery, pk=pk)
+    if request.method == 'POST':
+        form = GroceryForm(request.POST, edit=grocery.name)
+        if form.is_valid():
+            grocery.name = form.cleaned_data['name']
+            grocery.cost = form.cleaned_data['cost']
+            grocery.cost_amount = form.cleaned_data['cost_amount']
+            grocery.units = form.cleaned_data['units']
+            grocery.default_units = form.cleaned_data['units'] if form.cleaned_data['units'] == 'ct' else form.cleaned_data['default_units']
+            grocery.save()
+            grocery.update()
+            return HttpResponseRedirect(reverse('bakery:grocery-detail', args=(pk,)))
+    else:
+        form_info = {
+                'name': grocery.name,
+                'cost': grocery.cost,
+                'cost_amount': grocery.cost_amount,
+                'units': grocery.units,
+                'default_units': grocery.default_units
+        }
+        form = GroceryForm(form_info, edit=grocery.name)
     return render(request, 'bakery/addgrocery.html', {'form': form})
 
 def revert_name(str):

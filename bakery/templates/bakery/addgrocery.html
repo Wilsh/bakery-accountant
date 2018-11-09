@@ -1,12 +1,12 @@
 {% extends "bakery/base.html" %}
 
 {% block title %}
-  Add Ingredient
+  {% if form.editing %}Edit Ingredient{% else %}Add Ingredient{% endif %}
 {% endblock %}
 
 {% block content %}
   <div class="translucent">
-  <h1 class="text-center">Add an Ingredient</h1>
+  <h1 class="text-center">{% if form.editing %}Edit Ingredient &quot;{{ form.oldname }}&quot;{% else %}Add an Ingredient{% endif %}</h1>
 
   <form method="post">
     {% csrf_token %}
@@ -27,7 +27,6 @@
         </ul>
       {% endif %}
       <div class="form-group">
-        <!--<label for="{{ form.name.id_for_label }}">{{ form.name.label }}:</label>-->
         {{ form.name.label_tag }}
         <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" maxlength="{{ form.name.field.max_length }}" required value="{% if form.name.value != None %}{{ form.name.value }}{% endif %}" class="form-control {% if form.name.errors %}is-invalid{% endif %}" />
       </div>
@@ -42,9 +41,13 @@
         </ul>
       {% endif %}
       <div class="form-group">
-        <!--<label for="{{ form.cost.id_for_label }}">{{ form.cost.label }}:</label>-->
         {{ form.cost.label_tag }}
-        <input type="number" step="0.01" name="{{ form.cost.name }}" id="{{ form.cost.id_for_label }}" maxlength="{{ form.cost.field.max_length }}" required value="{% if form.cost.value != None %}{{ form.cost.value }}{% endif %}" class="form-control {% if form.cost.errors %}is-invalid{% endif %}" />
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">$</div>
+          </div>
+          <input type="number" step="0.01" name="{{ form.cost.name }}" id="{{ form.cost.id_for_label }}" maxlength="{{ form.cost.field.max_length }}" required value="{% if form.cost.value != None %}{{ form.cost.value }}{% endif %}" class="form-control {% if form.cost.errors %}is-invalid{% endif %}" />
+        </div>
       </div>
     </div>
     <!-- cost amount -->
@@ -57,7 +60,6 @@
         </ul>
       {% endif %}
       <div class="form-group">
-        <!--<label for="{{ form.cost_amount.id_for_label }}">{{ form.cost_amount.label }}:</label>-->
         {{ form.cost_amount.label_tag }}
         <input type="number" step="0.001" name="{{ form.cost_amount.name }}" id="{{ form.cost_amount.id_for_label }}" maxlength="{{ form.cost_amount.field.max_length }}" required value="{% if form.cost_amount.value != None %}{{ form.cost_amount.value }}{% endif %}" class="form-control {% if form.cost_amount.errors %}is-invalid{% endif %}" />
       </div>
@@ -108,8 +110,8 @@
 {% block script %}
 <script>
 //set choices to be blank on load
-$("#{{ form.default_units.id_for_label }}").val('').prop('selected', true);
-$("#{{ form.units.id_for_label }}").val('').prop('selected', true);
+//$("#{{ form.default_units.id_for_label }}").val('').prop('selected', true);
+//$("#{{ form.units.id_for_label }}").val('').prop('selected', true);
 //disable default_units choice if units == 'Count'
 $("#{{ form.units.id_for_label }}").on('change', function(){
     var choice = $("#{{ form.units.id_for_label }} option:selected").text()
