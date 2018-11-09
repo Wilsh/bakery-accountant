@@ -126,6 +126,16 @@ def edit_grocery(request, pk):
         form = GroceryForm(form_info, edit=grocery.name)
     return render(request, 'bakery/addgrocery.html', {'form': form})
 
+@require_http_methods(["POST"])
+@login_required
+def delete_grocery(request):
+    pk=request.POST['pk']
+    grocery = get_object_or_404(Grocery, pk=pk)
+    if grocery.can_be_deleted():
+        grocery.delete()
+        return HttpResponseRedirect(reverse('bakery:view-groceries'))
+    return HttpResponseRedirect(reverse('bakery:grocery-detail', args=(pk,)))
+
 def revert_name(str):
     '''Remove the text 'custom_amount_' or 'custom_units_' from the start of a string
     '''

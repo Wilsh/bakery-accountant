@@ -66,6 +66,9 @@ class Grocery(models.Model):
         components = Component.objects.filter(groceries=self)
         for component in components:
             component.update()
+    
+    def can_be_deleted(self):
+        return False if Component.objects.filter(groceries=self) else True
 
 class Ingredient(models.Model):
     '''Ingredient links a Grocery and Component with information about a

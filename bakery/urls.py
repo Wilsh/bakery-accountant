@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^edit/component/(?P<pk>[0-9]+)/$', views.edit_component, name='edit-component'),
     url(r'^edit/recipe/(?P<pk>[0-9]+)/$', views.edit_recipe, name='edit-recipe'),
     url(r'^edit/order/(?P<pk>[0-9]+)/$', views.edit_order, name='edit-order'),
+    url(r'^delete/grocery/$', views.delete_grocery, name='delete-grocery'),
     url(r'^delete/component/$', views.delete_component, name='delete-component'),
     url(r'^delete/recipe/$', views.delete_recipe, name='delete-recipe'),
     url(r'^delete/order/$', views.delete_order, name='delete-order'),
